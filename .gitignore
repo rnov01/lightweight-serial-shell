@@ -1,0 +1,79 @@
+# ============================
+# Build Artifacts
+# ============================
+*.o
+*.elf
+*.hex
+*.bin
+*.eep
+*.lst
+*.map
+*.srec
+
+# Auto-generated size/memory reports
+memusage.txt
+
+# Dependency files
+*.d
+
+# ============================
+# Build Directories
+# ============================
+build/
+out/
+bin/
+obj/
+
+# If using Makefile out-of-tree builds:
+*/build/
+*/bin/
+*/obj/
+
+# ============================
+# Backup / Temporary Files
+# ============================
+*~
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# ============================
+# Logs
+# ============================
+*.log
+
+# ============================
+# Doxygen Output (Optional)
+# ============================
+#docs/
+#html/
+latex/
+#doxygen-output/
+
+# ============================
+# IDE / Editor Files
+# ============================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# CLion / JetBrains
+.idea/
+cmake-build*/
+
+# Eclipse
+.settings/
+.cproject
+.project
+
+# ============================
+# OS Files
+# ============================
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
