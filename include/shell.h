@@ -120,6 +120,9 @@ public:
      *  \warning The last string argument passed MUST be nullptr. \n consider a macro to automatically 
      *  append a nullptr string to the function arguments for safety */
     void puts_many(const char* first, ...);
+    //flexible for flash storage on some hardware
+    void puts_ro(const char* p);
+    void puts_many_ro(const char* first, ...);
 
     /*! \name Legacy functions
      *  \brief Non-blocking/blocking char input
@@ -158,3 +161,8 @@ private:
     static const flag_t led_flags[];
 };
 
+#define puts_many_(sh, ...) \
+    do { \
+        const char* const _ro_list_[] = { __VA_ARGS__, nullptr }; \
+        puts_many_ro_i(sh, _ro_list_); \
+    } while(0)
