@@ -99,48 +99,14 @@ $(function(){initNavTree('shell_8cpp.html','',''); });
 <code>#include &quot;<a class="el" href="usart_8h_source.html">../include/usart.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ring__buffer_8h_source.html">../include/ring_buffer.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="ro_8h_source.html">../include/ro.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="colors_8h_source.html">../include/colors.h</a>&quot;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a4950fff957cf5533b2231a778118f4c3" id="r_a4950fff957cf5533b2231a778118f4c3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structringbuf.html">ringbuf</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4950fff957cf5533b2231a778118f4c3">GLOBAL_BUFFER</a> = {{0}, 0, 0}</td></tr>
-<tr class="memitem:a96855b9a6c452455ae900c87cf2d23e9" id="r_a96855b9a6c452455ae900c87cf2d23e9"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="structstr__to__cmd.html">str_to_cmd</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a96855b9a6c452455ae900c87cf2d23e9">COMMAND_LUT</a> []</td></tr>
 </table>
 <a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a96855b9a6c452455ae900c87cf2d23e9" name="a96855b9a6c452455ae900c87cf2d23e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a96855b9a6c452455ae900c87cf2d23e9">&#9670;&#160;</a></span>COMMAND_LUT</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="structstr__to__cmd.html">str_to_cmd</a> COMMAND_LUT[]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
-<div class="line">    {<span class="stringliteral">&quot;help&quot;</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">command_id_t::HELP</a>},</div>
-<div class="line">    {<span class="stringliteral">&quot;debug&quot;</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a0593585da9181e972974c1274d8f2b4f">command_id_t::DEBUG</a>},</div>
-<div class="line">    {<span class="stringliteral">&quot;print&quot;</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ab107229d44d042caa8ab8df4c8acaa1f">command_id_t::PRINT</a>},</div>
-<div class="line">    {<span class="stringliteral">&quot;led&quot;</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12">command_id_t::LED</a>},</div>
-<div class="line">    {<span class="keyword">nullptr</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">command_id_t::err</a>}</div>
-<div class="line">}</div>
-<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2a0593585da9181e972974c1274d8f2b4f"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a0593585da9181e972974c1274d8f2b4f">DEBUG</a></div><div class="ttdeci">@ DEBUG</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
-<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12">LED</a></div><div class="ttdeci">@ LED</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
-<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">HELP</a></div><div class="ttdeci">@ HELP</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
-<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2ab107229d44d042caa8ab8df4c8acaa1f"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ab107229d44d042caa8ab8df4c8acaa1f">PRINT</a></div><div class="ttdeci">@ PRINT</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
-<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">err</a></div><div class="ttdeci">@ err</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
-</div><!-- fragment -->
-</div>
-</div>
 <a id="a4950fff957cf5533b2231a778118f4c3" name="a4950fff957cf5533b2231a778118f4c3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a4950fff957cf5533b2231a778118f4c3">&#9670;&#160;</a></span>GLOBAL_BUFFER</h2>
 

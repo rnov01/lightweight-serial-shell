@@ -4,6 +4,7 @@
 #include "../include/ro.h"
 #include "../include/colors.h"
 #include <string.h>
+#include <util/delay.h>
 
 ringbuf GLOBAL_BUFFER = {{0}, 0, 0};
 
@@ -40,18 +41,19 @@ int shell::poll() {
         if(line_len > 0) {
             sh_line[line_len] = '\0';       //terminate str
             //line_len = 0;                   //reset 
-
+            memset(_argv, 0, sizeof(_argv));
             _argc = tokenizer(sh_line, _argv, MAX_ARGS);    
             command_rt_t* cmd = parse_command(_argv[0]);
             //puts_const(sh_line);              debug readouts
             //puts_const(cmd->def->name);
             if (!cmd) {
                puts_ro(ROSTR("Invalid command.\r\nType help -long for a list of commands and their descriptions"));
+               error("Bad!");
             } else {
                 if (cmd->type == MEMBER_H) {
-                    (this->*(cmd->exe.mem))(_argc, _argv);
+                    (this->*(cmd->exe.mem))(cmd, _argc, _argv);
                 } else {
-                    cmd->exe.free(_argc, _argv);
+                    cmd->exe.free(cmd, _argc, _argv);
                 }
                 
             }
@@ -111,6 +113,74 @@ void shell::puts_many_ro(const char* first, ...) {
     va_end(args);
 }
 
+void shell::puts_name(command_rt_t* cmd) {
+    if (cmd->is_user)
+        puts_ro(CYEL);
+    else
+        puts_ro(CCYA);
+    
+    puts_const(cmd->def->name);
+    puts_ro((C_));
+}
+
+void shell::puts_flag(const char* name) {
+   puts_ro(CGRN);
+   puts_const(name);
+   puts_ro(C_);
+}
+
+void shell::execute(const command_rt_t* cmd, int argc, char** argv) {
+
+}
+
+//returns a specified flag
+const flag_t* shell::find_flag(const command_rt_t* cmd, const char* flagname) {
+    const flag_t* const* flags = get_cmd_flags(cmd->def->name);
+    if (!flags || !cmd) {
+        return nullptr;
+    }
+    for(int i=0; flags[i] != nullptr; i++) {
+        if(strcmp(flagname, flags[i]->name) == 0) {
+            return flags[i];
+        }
+    }
+    return nullptr;
+}
+
+
+//check if user input command has a flag
+bool shell::has_flag(int argc, char **argv, const char* flag) {
+  
+    for(int i=1; i < argc; i++) {
+        if(strcmp(argv[i], flag) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void shell::dispatch_flag(const command_rt_t* parent, const flag_t* flag, int argc, char** argv) {
+    if (!flag || !flag->exe) return;
+    (this->*(flag->exe))(parent, argc, argv);
+}
+
+    //returns args
+const char* get_opt(int argc, char** argv, const char* opt) {
+    for(int i=0; i<argc-1; i++) {
+        if(strcmp(argv[i], opt) == 0) {
+            return argv[i + 1];
+        }
+    }
+    return nullptr;
+}
+
+void shell::error(const char* msg) {
+    PUTP(CRED);
+    PUT("\r\nError: ");
+    PUT(msg);
+    PUTLNP(C_);
+}
+
 char shell::nbget() {
     return 0;
 }
@@ -131,6 +201,8 @@ char shell::bget() {
 void shell::build_cmd_table(const command_def_t* table) {
     if (!table) return;
     
+    bool is_sys_table = (table == cmd);
+
     for(int i=0; table[i].name != nullptr; i++) {
         //check for duplicates
         bool exists = false;
@@ -153,6 +225,7 @@ void shell::build_cmd_table(const command_def_t* table) {
             
             final_cmd[final_count].flag_count = 0;
             final_cmd[final_count].id = final_count;
+            final_cmd[final_count].is_user = !is_sys_table;
             
             //clr flags (populate by build flag links)
             for(int k=0; k<MAX_FLAGS; k++) {
@@ -227,15 +300,15 @@ const flag_t* const* shell::get_cmd_flags(const char* parent) {
 
 
 //help flags
-void shell::f_help_long(int argc, char **argv) {
+void shell::f_help_long(const command_rt_t* parent, int argc, char **argv) {
     puts_ro(ROSTR("\r\nFull command descriptions:\r\n"));
     for(int i=0; i < final_count; i++) {
         if (final_cmd[i].def->in_progmem) {
-            puts_many(CCYA, final_cmd[i].def->name, C_, nullptr);
+            puts_name(&final_cmd[i]);
             puts_many_ro(ROSTR(" - "), final_cmd[i].def->description, ROSTR("\r\n"), nullptr);
         }
         else {
-            puts_const(final_cmd[i].def->name);
+            puts_name(&final_cmd[i]);
             puts_ro(ROSTR(" - "));
             puts_const(final_cmd[i].def->description);
             puts_ro(ROSTR("\r\n"));
@@ -245,7 +318,7 @@ void shell::f_help_long(int argc, char **argv) {
     puts_ro(ROSTR("\r\nUse -c <command> to list flags for a specific command\r\n"));
 }
 
-void shell::f_help_c(int argc, char **argv) {
+void shell::f_help_c(const command_rt_t* parent, int argc, char **argv) {
     if (argc < 3) {
         puts_ro(ROSTR("Usage: help -c <command>\r\n"));
         return;
@@ -254,9 +327,8 @@ void shell::f_help_c(int argc, char **argv) {
     for(int a=0; a<final_count; a++) {
         if (strcmp(target, final_cmd[a].def->name) == 0) {
             puts_ro(ROSTR("\r\nFlags available for command: ")); 
-            puts_const(CCYA);
-            puts_const(final_cmd[a].def->name);
-            puts_many(C_, "\r\n\r\n", nullptr);
+            puts_name(&final_cmd[a]);
+            puts_ro(ROSTR("\r\n\r\n"));
 
             const flag_t* const* flags = final_cmd[a].flags;
 
@@ -265,10 +337,13 @@ void shell::f_help_c(int argc, char **argv) {
                 return;
             }
             for (int b=0; flags[b] != nullptr; b++) {
-                puts_ro(ROSTR("\x1B[32m"));
-                puts_const(flags[b]->name);
-                puts_ro(ROSTR("\x1B[0m"));
-                puts_many_ro(ROSTR(" >> "), flags[b]->description, ROSTR("\r\n"), nullptr);
+                puts_flag(flags[b]->name);
+                if(final_cmd[a].def->in_progmem) {
+                    puts_many_ro(ROSTR(" >> "), flags[b]->description, ROSTR("\r\n"), nullptr);
+                } else {
+                    puts_many((" >> "), flags[b]->description, "\r\n", nullptr);
+                }
+                
             }
             return;
         }
@@ -278,65 +353,54 @@ void shell::f_help_c(int argc, char **argv) {
     puts_ro(ROSTR(" not recognized"));
 }
 
-void shell::cmd_help(int argc, char **argv) {
+void shell::cmd_help(const command_rt_t* self, int argc, char **argv) {
     if (argc == 1) {
         puts_ro(ROSTR("\r\nHere is a list of system commands:\r\n"));
         puts_ro(ROSTR("----------------------------------\r\n"));
         for (int i=0; i<final_count; i++) {
-            puts_many(CCYA, final_cmd[i].def->name, C_, "\r\n", nullptr);
+            puts_name(&final_cmd[i]);
+            puts_ro(ROSTR("\r\n"));
             }
-            
             return;
     } 
-    
     //argc>1
-    const char* flagname = argv[1];
-    const flag_t* const* flags = get_cmd_flags("help");
-
-    if (!flags) {
-        puts_ro(ROSTR("Help command has no flags"));
+    const flag_t* flag = find_flag(self, argv[1]);
+    if (!flag) {
+        puts_ro(ROSTR("Unkown help flag\r\n"));
         return;
     }
-
-    for(int i=0; flags[i] != nullptr; i++) {
-        if(strcmp(flagname, flags[i]->name) == 0) {
-            (this->*(flags[i]->exe))(argc, argv);
-            return;
-        }
-    }
-    puts_ro(ROSTR("Unknown help flag\r\n"));
-    /*else if (argc > 1) {
-        for (int i=1; i<argc; i++) {
-            for (int j=0; help_flags[j].name != nullptr; j++) {
-                if (strcmp(argv[i], help_flags[j].name)==0) {
-                    (this->*(help_flags[j].exe))(argc, argv);
-                    return;
-                }
-            }
-        }
-    }*/
+    dispatch_flag(self, flag, argc, argv);
+   
 }
 
-void shell::cmd_debug(int argc, char **argv) {
+void shell::cmd_debug(const command_rt_t* self, int argc, char **argv) {
     
 }
 
-void shell::cmd_print(int argc, char **argv) {
+void shell::cmd_print(const command_rt_t* self, int argc, char **argv) {
 
 }
 
-void shell::cmd_led(int argc, char **argv) {
+void shell::f_led_blink(const command_rt_t* parent, int argc, char **argv) {
+    for(int i=0; i < 20; i++) {
+        toggle(PIN_B7);
+        _delay_ms(500);
+    }
+}
+
+void shell::cmd_led(const command_rt_t* self, int argc, char **argv) {
     if (argc == 1) {
         toggle(PIN_B7);
-    } else if (argc > 1) {
-        for (int i = 0; i<argc; i++) {
-            if (strcmp(argv[i], "-d")==0) {
-                toggle(PIN_B7);
-                puts_ro(cmd[LED].description);
-                puts_ro(ROSTR("\r\n"));
-            }
-        }
+    } 
+        
+    const flag_t* flag = find_flag(self, argv[1]);
+    if (flag == nullptr) {
+        return;
+    } else if (!flag) {
+        puts_ro(ROSTR("Unknown led flag\r\n"));
+        return;
     }
+    dispatch_flag(self, flag, argc, argv);
 }
 
 

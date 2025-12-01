@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['x_0',['X',['../pin_8h.html#a207fd5507206d307cd63f95374fcd00d',1,'pin.h']]]
+  ['toggle_0',['toggle',['../pin_8h.html#a2aff79684b1a93ca3a97552e2744f904',1,'pin.h']]]
 ];

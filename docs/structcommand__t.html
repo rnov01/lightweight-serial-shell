@@ -97,37 +97,16 @@ $(function(){initNavTree('structcommand__t.html','','structcommand__t-members');
 </div><!--header-->
 <div class="contents">
 
-<p>Struct defining the lookup table entry for each system command.  
- <a href="#details">More...</a></p>
-
 <p><code>#include &lt;<a class="el" href="commands_8h_source.html">commands.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a7669822c9db256e89589d5a876f9b985" id="r_a7669822c9db256e89589d5a876f9b985"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7669822c9db256e89589d5a876f9b985">name</a></td></tr>
 <tr class="memitem:a54ba7039f7c3b4ad44b90c4b6e96597e" id="r_a54ba7039f7c3b4ad44b90c4b6e96597e"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a54ba7039f7c3b4ad44b90c4b6e96597e">description</a></td></tr>
-<tr class="memitem:ad5d4b150d893a7be445bc9d943e7fef9" id="r_ad5d4b150d893a7be445bc9d943e7fef9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="shell_8h.html#af9667052b09a5914820878e5cbebec96">cmd_handler</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5d4b150d893a7be445bc9d943e7fef9">exe</a></td></tr>
-<tr class="memitem:a2d5d4fa3363a89d84ed91c27dd2c7377" id="r_a2d5d4fa3363a89d84ed91c27dd2c7377"><td class="memItemLeft" align="right" valign="top"><a class="el" href="shell_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d5d4fa3363a89d84ed91c27dd2c7377">cmd</a></td></tr>
-<tr class="memitem:ab2a1d973d663c677a67cbaba672dc1ad" id="r_ab2a1d973d663c677a67cbaba672dc1ad"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab2a1d973d663c677a67cbaba672dc1ad">name</a></td></tr>
-<tr class="memitem:aef3e196552e96d6da9fa586c0f982d22" id="r_aef3e196552e96d6da9fa586c0f982d22"><td class="memItemLeft" align="right" valign="top">const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aef3e196552e96d6da9fa586c0f982d22">description</a></td></tr>
-<tr class="memitem:a14d81320157b48035fe69bc562a93974" id="r_a14d81320157b48035fe69bc562a93974"><td class="memItemLeft" align="right" valign="top"><a class="el" href="shell_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a14d81320157b48035fe69bc562a93974">id</a></td></tr>
-<tr class="memitem:a31df4c6b93d44bd3379eac034d4e56d1" id="r_a31df4c6b93d44bd3379eac034d4e56d1"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structflag__t.html">flag_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a31df4c6b93d44bd3379eac034d4e56d1">flags</a></td></tr>
+<tr class="memitem:ad5d4b150d893a7be445bc9d943e7fef9" id="r_ad5d4b150d893a7be445bc9d943e7fef9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="commands_8h.html#a929022332fceda3b91f763b5d9a6c80d">cmd_handler</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad5d4b150d893a7be445bc9d943e7fef9">exe</a></td></tr>
+<tr class="memitem:a2d5d4fa3363a89d84ed91c27dd2c7377" id="r_a2d5d4fa3363a89d84ed91c27dd2c7377"><td class="memItemLeft" align="right" valign="top"><a class="el" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d5d4fa3363a89d84ed91c27dd2c7377">cmd</a></td></tr>
 </table>
-<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Struct defining the lookup table entry for each system command. </p>
-<p>/struct <a class="el" href="structcommand__t.html" title="Struct defining the lookup table entry for each system command.">command_t</a></p>
-<p>Their should be exactly one definition for the command lookup table in <a class="el" href="lut_8cpp.html">lut.cpp</a>. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">name</td><td>Command name (string literal) </td></tr>
-    <tr><td class="paramname">description</td><td>Short summary printed using <div class="fragment"><div class="line">help -<span class="keywordtype">long</span> </div>
-</div><!-- fragment --> </td></tr>
-    <tr><td class="paramname">exe</td><td>A pointer to the primary cmd_* handler for this command </td></tr>
-    <tr><td class="paramname">id</td><td>Command ID for backend execution </td></tr>
-    <tr><td class="paramname">flags</td><td>A pointer to an array of <a class="el" href="structflag__t.html" title="Describes a single flag (subcommand) associated with a primary command.">flag_t</a> structs, or nullptr if the command has no flags </td></tr>
-  </table>
-  </dd>
-</dl>
-</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a2d5d4fa3363a89d84ed91c27dd2c7377" name="a2d5d4fa3363a89d84ed91c27dd2c7377"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2d5d4fa3363a89d84ed91c27dd2c7377">&#9670;&#160;</a></span>cmd</h2>
 
@@ -135,7 +114,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="shell_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a> command_t::cmd</td>
+          <td class="memname"><a class="el" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a> command_t::cmd</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -143,27 +122,13 @@ Public Attributes</h2></td></tr>
 </div>
 </div>
 <a id="a54ba7039f7c3b4ad44b90c4b6e96597e" name="a54ba7039f7c3b4ad44b90c4b6e96597e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a54ba7039f7c3b4ad44b90c4b6e96597e">&#9670;&#160;</a></span>description <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a54ba7039f7c3b4ad44b90c4b6e96597e">&#9670;&#160;</a></span>description</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">char* command_t::description</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aef3e196552e96d6da9fa586c0f982d22" name="aef3e196552e96d6da9fa586c0f982d22"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aef3e196552e96d6da9fa586c0f982d22">&#9670;&#160;</a></span>description <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* command_t::description</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -177,35 +142,7 @@ Public Attributes</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="shell_8h.html#af9667052b09a5914820878e5cbebec96">cmd_handler</a> command_t::exe</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a31df4c6b93d44bd3379eac034d4e56d1" name="a31df4c6b93d44bd3379eac034d4e56d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a31df4c6b93d44bd3379eac034d4e56d1">&#9670;&#160;</a></span>flags</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="structflag__t.html">flag_t</a>* command_t::flags</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a14d81320157b48035fe69bc562a93974" name="a14d81320157b48035fe69bc562a93974"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a14d81320157b48035fe69bc562a93974">&#9670;&#160;</a></span>id</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="shell_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a> command_t::id</td>
+          <td class="memname"><a class="el" href="commands_8h.html#a929022332fceda3b91f763b5d9a6c80d">cmd_handler</a> command_t::exe</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -213,7 +150,7 @@ Public Attributes</h2></td></tr>
 </div>
 </div>
 <a id="a7669822c9db256e89589d5a876f9b985" name="a7669822c9db256e89589d5a876f9b985"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7669822c9db256e89589d5a876f9b985">&#9670;&#160;</a></span>name <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a7669822c9db256e89589d5a876f9b985">&#9670;&#160;</a></span>name</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -226,23 +163,8 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ab2a1d973d663c677a67cbaba672dc1ad" name="ab2a1d973d663c677a67cbaba672dc1ad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab2a1d973d663c677a67cbaba672dc1ad">&#9670;&#160;</a></span>name <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">const char* command_t::name</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<hr/>The documentation for this struct was generated from the following files:<ul>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>include/<a class="el" href="commands_8h_source.html">commands.h</a></li>
-<li>include/<a class="el" href="shell_8h_source.html">shell.h</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

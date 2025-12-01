@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['rx_5fint_5fmode_0',['rx_int_mode',['../usart_8h.html#a429fda2601d202da2bf0743c21c83bce',1,'usart.h']]],
-  ['rx_5fmode_1',['rx_mode',['../usart_8h.html#a48946c28b038a30c870986b54dffd74c',1,'usart.h']]]
+  ['handler_5ftype_5ft_0',['handler_type_t',['../shell_8h.html#aa8d2e1b59084ad8904d1a0e6d43d1a53',1,'shell.h']]]
 ];

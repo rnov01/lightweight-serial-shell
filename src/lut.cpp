@@ -11,7 +11,7 @@ const flag_t shell::sys_flags[] = {
      //print
     //{"-long", "Gives a short description of each available command\r\n", nullptr, print_n};
      //led
-    {"-blink", "Gives a short description of each available command", nullptr, led_n, true},
+    {"-blink", led_bf_d, &shell::f_led_blink, led_n, true},
     {nullptr, nullptr, nullptr, nullptr}
 };
 

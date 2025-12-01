@@ -14,3 +14,4 @@ const char print_d[] RODATA = "Echoes user argument";
 
 const char led_n[] = "led";
 const char led_d[] RODATA = "Toggles the onboard LED";
+    const char led_bf_d[] RODATA = "Blink led for 10 seconds";

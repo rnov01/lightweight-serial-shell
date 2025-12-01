@@ -100,18 +100,24 @@ $(function(){initNavTree('ro_8h_source.html','',''); });
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span>    <span class="comment">//optimize lut and string literal storage for AVR chips by storing in flash</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">    #include &lt;avr/pgmspace.h&gt;</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="preprocessor">    #define RODATA PROGMEM</span></div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">    #define ROSTR(x) PSTR(x)</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    </div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="preprocessor">    #define READ_RO_PTR(type, addr) ((type)pgm_read_word(addr))</span></div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">    #define READ_RO_BYTE(addr) pgm_read_byte(addr)</span></div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    <span class="comment">//for architectures w/o distinct flash and sram </span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno"><a class="line" href="ro_8h.html#a796567a0db15ca71496e58536940c18b">   14</a></span><span class="preprocessor">    #define RODATA</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno"><a class="line" href="ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c">   15</a></span><span class="preprocessor">    #define ROSTR(x) (x)</span></div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
-<div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="ro_8h.html#aa498fafea9523c8d067c03a96a612ab7">   17</a></span><span class="preprocessor">    #define READ_RO_POINTER(type, addr) (*(type*)(addr))</span></div>
-<div class="line"><a id="l00018" name="l00018"></a><span class="lineno"><a class="line" href="ro_8h.html#aa14c7c7dba0a86af4967162f2c808e97">   18</a></span><span class="preprocessor">    #define READ_RO_BYTE(addr) (*(uint8_t*)(addr))</span></div>
-<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="preprocessor">#define ROSTR(x) PSTR(x)</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>  </div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    </div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="preprocessor">    #define READ_RO_PTR(type, addr) ((type)pgm_read_word(addr))</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">    #define READ_RO_BYTE(addr) pgm_read_byte(addr)</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    <span class="comment">//for architectures w/o distinct flash and sram </span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno"><a class="line" href="ro_8h.html#a796567a0db15ca71496e58536940c18b">   19</a></span><span class="preprocessor">    #define RODATA</span></div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno"><a class="line" href="ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c">   20</a></span><span class="preprocessor">    #define ROSTR(x) (x)</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> </div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="ro_8h.html#aa498fafea9523c8d067c03a96a612ab7">   22</a></span><span class="preprocessor">    #define READ_RO_POINTER(type, addr) (*(type*)(addr))</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="ro_8h.html#aa14c7c7dba0a86af4967162f2c808e97">   23</a></span><span class="preprocessor">    #define READ_RO_BYTE(addr) (*(uint8_t*)(addr))</span></div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 </div><!-- container -->

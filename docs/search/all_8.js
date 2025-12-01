@@ -5,7 +5,9 @@ var searchData=
   ['entry_2',['Entry',['../md__r_e_a_d_m_e.html#autotoc_md22',1,'Command ID Enum Entry'],['../index.html#autotoc_md42',1,'Command ID Enum Entry'],['../md__r_e_a_d_m_e.html#autotoc_md24',1,'Command Table Entry'],['../index.html#autotoc_md43',1,'Command Table Entry'],['../md__r_e_a_d_m_e.html#autotoc_md26',1,'Flag Table Entry'],['../index.html#autotoc_md44',1,'Flag Table Entry']]],
   ['enum_20entry_3',['Enum Entry',['../md__r_e_a_d_m_e.html#autotoc_md22',1,'Command ID Enum Entry'],['../index.html#autotoc_md42',1,'Command ID Enum Entry']]],
   ['err_4',['err',['../commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99',1,'err:&#160;commands.h'],['../shell_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99',1,'err:&#160;shell.h']]],
-  ['example_5',['Example',['../md__r_e_a_d_m_e.html#autotoc_md28',1,'Command Handler Example'],['../md__r_e_a_d_m_e.html#autotoc_md30',1,'Flag Handler Example']]],
-  ['examples_6',['Examples',['../md__r_e_a_d_m_e.html#autotoc_md21',1,'Code Examples'],['../index.html#ex',1,'Code Examples']]],
-  ['exe_7',['exe',['../structcommand__t.html#ad5d4b150d893a7be445bc9d943e7fef9',1,'command_t::exe'],['../structflag__t.html#ac6c3908202c72a360f9eb6cd62384b4f',1,'flag_t::exe']]]
+  ['err_5fid_5',['err_id',['../struct__err.html#a99fed00af9066d734e7d828c0949e55d',1,'_err']]],
+  ['error_6',['error',['../classshell.html#a8cc258782b0819deeab9c37def5b3a2d',1,'shell']]],
+  ['example_7',['Example',['../md__r_e_a_d_m_e.html#autotoc_md28',1,'Command Handler Example'],['../md__r_e_a_d_m_e.html#autotoc_md30',1,'Flag Handler Example']]],
+  ['examples_8',['Examples',['../md__r_e_a_d_m_e.html#autotoc_md21',1,'Code Examples'],['../index.html#ex',1,'Code Examples']]],
+  ['exe_9',['exe',['../structcommand__t.html#ad5d4b150d893a7be445bc9d943e7fef9',1,'command_t::exe'],['../structflag__t.html#ac6c3908202c72a360f9eb6cd62384b4f',1,'flag_t::exe'],['../structcommand__def__t.html#a7acca58f3791ea9f4d8129858fb72aae',1,'command_def_t::exe'],['../structcommand__rt__t.html#ad14d24290a8cd976cd297beb9c326770',1,'command_rt_t::exe']]]
 ];

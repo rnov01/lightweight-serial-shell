@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['buffer_5fsize_0',['BUFFER_SIZE',['../usart__tb_8cpp.html#a6b20d41d6252e9871430c242cb1a56e7',1,'usart_tb.cpp']]]
+  ['addr8_0',['ADDR8',['../usart__tb_8cpp.html#ae944be9ebb0ca3db9743bb2b99f59319',1,'usart_tb.cpp']]]
 ];

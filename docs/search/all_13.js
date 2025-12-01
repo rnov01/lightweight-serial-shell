@@ -10,7 +10,7 @@ var searchData=
   ['ring_5fbuffer_5fsize_7',['RING_BUFFER_SIZE',['../ring__buffer_8h.html#a779b513296068d2a6186659183ff3c2c',1,'ring_buffer.h']]],
   ['ringbuf_8',['ringbuf',['../structringbuf.html',1,'']]],
   ['ro_2eh_9',['ro.h',['../ro_8h.html',1,'']]],
-  ['rodata_10',['RODATA',['../ro_8h.html#a796567a0db15ca71496e58536940c18b',1,'RODATA:&#160;ro.h'],['../descriptions_8h.html#ad160240304f68937c01063dbb8b9706f',1,'RODATA:&#160;descriptions.h']]],
+  ['rodata_10',['RODATA',['../ro_8h.html#a796567a0db15ca71496e58536940c18b',1,'RODATA:&#160;ro.h'],['../lut_8cpp.html#a489444bc81e881baeb1ee817ad2123f9',1,'RODATA:&#160;lut.cpp'],['../descriptions_8h.html#ad160240304f68937c01063dbb8b9706f',1,'RODATA:&#160;descriptions.h']]],
   ['rostr_11',['ROSTR',['../ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c',1,'ro.h']]],
   ['run_5fusart_5ftest_12',['run_usart_test',['../usart__tb_8cpp.html#a9761b01b97efb3807b6f503987dff6f1',1,'usart_tb.cpp']]],
   ['rx_5fint_5fmode_13',['rx_int_mode',['../usart_8h.html#a429fda2601d202da2bf0743c21c83bce',1,'usart.h']]],

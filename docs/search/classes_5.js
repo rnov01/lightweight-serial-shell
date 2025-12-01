@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['usart_0',['USART',['../class_u_s_a_r_t.html',1,'']]]
+  ['shell_0',['shell',['../classshell.html',1,'']]],
+  ['str_5fto_5fcmd_1',['str_to_cmd',['../structstr__to__cmd.html',1,'']]]
 ];

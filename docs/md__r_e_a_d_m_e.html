@@ -123,7 +123,7 @@ Architecture</h1>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
 1. Input Buffer and Tokenizer</h2>
 <p>Characters arriving from the serial backend accumulate in a global ring buffer. <br  />
- When the system is available, <span class="tt"><a class="el" href="classshell.html#a74723ac80737b26b155430bd4e907116" title="Polls the global ring buffer for new characters.">shell::poll()</a></span> transfers characters from the ring buffer into the shell’s input buffer (<span class="tt">sh_line[]</span>). Once a command terminator is received, the tokenizer splits it into:</p>
+ When the system is available, <span class="tt"><a class="el" href="classshell.html#a10b1e6ecd7204cd3958e27e8cabd52ef" title="Polls the global ring buffer for new characters.">shell::poll()</a></span> transfers characters from the ring buffer into the shell’s input buffer (<span class="tt">sh_line[]</span>). Once a command terminator is received, the tokenizer splits it into:</p>
 <ul>
 <li>base command <br  />
 </li>
@@ -213,7 +213,7 @@ Integration</h1>
 <div class="line">    sh.poll();  <span class="comment">// process input and execute commands</span></div>
 <div class="line">}</div>
 <div class="ttc" id="aclass_u_s_a_r_t_html"><div class="ttname"><a href="class_u_s_a_r_t.html">USART</a></div><div class="ttdoc">Interface for AVR USART operation.</div><div class="ttdef"><b>Definition</b> usart.h:42</div></div>
-<div class="ttc" id="aclassshell_html"><div class="ttname"><a href="classshell.html">shell</a></div><div class="ttdoc">Driver class for the serial shell interface.</div><div class="ttdef"><b>Definition</b> shell.h:90</div></div>
+<div class="ttc" id="aclassshell_html"><div class="ttname"><a href="classshell.html">shell</a></div><div class="ttdoc">Driver class for the serial shell interface.</div><div class="ttdef"><b>Definition</b> shell.h:123</div></div>
 </div><!-- fragment --><p>The shell is transport-agnostic. <br  />
  Any backend capable of providing characters to the shell will work.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
@@ -222,7 +222,7 @@ Typical Backend Model</h2>
 <ul>
 <li>The <a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a> RX ISR stores incoming bytes in the global ring buffer <br  />
 </li>
-<li><span class="tt"><a class="el" href="classshell.html#a74723ac80737b26b155430bd4e907116" title="Polls the global ring buffer for new characters.">shell::poll()</a></span> reads from the ring buffer and assembles the command in <span class="tt">sh_line[]</span> <br  />
+<li><span class="tt"><a class="el" href="classshell.html#a10b1e6ecd7204cd3958e27e8cabd52ef" title="Polls the global ring buffer for new characters.">shell::poll()</a></span> reads from the ring buffer and assembles the command in <span class="tt">sh_line[]</span> <br  />
 </li>
 <li>When a newline is detected, the command is tokenized and executed</li>
 </ul>
@@ -265,7 +265,7 @@ Command Table Entry</h2>
 <div class="line">    {<span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">err</a>, <span class="keyword">nullptr</span>}</div>
 <div class="line">};</div>
 <div class="ttc" id="ashell_8h_html_a865d62d968934bf5e3a8deeea9d8dbf2"><div class="ttname"><a href="shell_8h.html#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a></div><div class="ttdeci">const flag_t help_flags[]</div></div>
-<div class="ttc" id="astructcommand__t_html"><div class="ttname"><a href="structcommand__t.html">command_t</a></div><div class="ttdoc">Struct defining the lookup table entry for each system command.</div><div class="ttdef"><b>Definition</b> commands.h:18</div></div>
+<div class="ttc" id="astructcommand__t_html"><div class="ttname"><a href="structcommand__t.html">command_t</a></div><div class="ttdef"><b>Definition</b> commands.h:18</div></div>
 </div><!-- fragment --><p>This table must be defined <b>exactly once</b> in <span class="tt"><a class="el" href="lut_8cpp.html">lut.cpp</a></span>.</p>
 <hr  />
 <h2 class="doxsection"><a class="anchor" id="autotoc_md26"></a>
@@ -275,7 +275,7 @@ Flag Table Entry</h2>
 <div class="line">    { <span class="stringliteral">&quot;-c&quot;</span>,    <span class="stringliteral">&quot;Show flags for a command&quot;</span>, &amp;shell::f_help_c },</div>
 <div class="line">    { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div>
 <div class="line">};</div>
-<div class="ttc" id="astructflag__t_html"><div class="ttname"><a href="structflag__t.html">flag_t</a></div><div class="ttdoc">Describes a single flag (subcommand) associated with a primary command.</div><div class="ttdef"><b>Definition</b> shell.h:51</div></div>
+<div class="ttc" id="astructflag__t_html"><div class="ttname"><a href="structflag__t.html">flag_t</a></div><div class="ttdoc">Describes a single flag (subcommand) associated with a primary command.</div><div class="ttdef"><b>Definition</b> shell.h:68</div></div>
 </div><!-- fragment --><p>Flag tables should also be defined in <span class="tt"><a class="el" href="lut_8cpp.html">lut.cpp</a></span>.</p>
 <hr  />
 <h2 class="doxsection"><a class="anchor" id="autotoc_md28"></a>
@@ -297,8 +297,8 @@ Command Handler Example</h2>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassshell_html_a0ef2577e3593b6625c8727b10f33850b"><div class="ttname"><a href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">shell::puts_many</a></div><div class="ttdeci">void puts_many(const char *first,...)</div><div class="ttdoc">Print multiple concatenated strings separated by commmas.</div><div class="ttdef"><b>Definition</b> shell.cpp:73</div></div>
-<div class="ttc" id="aclassshell_html_a7be2bdd33c2361aa8ce54253a678601e"><div class="ttname"><a href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">shell::puts_const</a></div><div class="ttdeci">void puts_const(const char *s)</div><div class="ttdoc">Used to trasmit constant string (string literal)</div><div class="ttdef"><b>Definition</b> shell.cpp:70</div></div>
+<div class="ttc" id="aclassshell_html_a0ef2577e3593b6625c8727b10f33850b"><div class="ttname"><a href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">shell::puts_many</a></div><div class="ttdeci">void puts_many(const char *first,...)</div><div class="ttdoc">Print multiple concatenated strings separated by commmas.</div><div class="ttdef"><b>Definition</b> shell.cpp:84</div></div>
+<div class="ttc" id="aclassshell_html_a7be2bdd33c2361aa8ce54253a678601e"><div class="ttname"><a href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">shell::puts_const</a></div><div class="ttdeci">void puts_const(const char *s)</div><div class="ttdoc">Used to trasmit constant string (string literal)</div><div class="ttdef"><b>Definition</b> shell.cpp:81</div></div>
 <div class="ttc" id="acommands_8h_html_ae265a4132f212d84a4a0ebe470bdb977"><div class="ttname"><a href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a></div><div class="ttdeci">const command_t cmd[NUM_CMDS]</div><div class="ttdef"><b>Definition</b> commands.h:28</div></div>
 </div><!-- fragment --><hr  />
 <h2 class="doxsection"><a class="anchor" id="autotoc_md30"></a>

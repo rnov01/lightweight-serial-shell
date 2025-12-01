@@ -29,24 +29,25 @@ struct _err {
     const char* message;
 };
 
-// Forward declaration of shell class
+// Forward declaration of shell class and runtime command struct
 class shell;
+struct command_rt_t;
 
 /*! \brief Function pointer type for command handlers (cmd_* functions). 
  *  \details Command handlers execute the main command functionality and are responsible for invoking any 
  *  associated flag handlers (f_* functions) if any flags were supplied via terminal input. 
  *  \param argc Number of parsed arguments (command + flags + parameters) 
  *  \param argv Array of pointers to parsed argument strings */
-typedef void (shell::*cmd_handler)(int argc, char **argv);
+typedef void (shell::*cmd_handler)(const command_rt_t* self, int argc, char **argv);
 /*! \brief Function pointer type for flag handlers (f_* functions)
  *  \details These functions implement the behavior of flags/subcommands associated with a primary command. They
     are called <i>only</i> from within their respective cmd_* command handler.
  *  \param argc Number of parsed arguments 
  *  \param argv Array of pointers to parsed argument strings */
-typedef void (shell::*flag_handler)(int argc, char **argv);
+typedef void (shell::*flag_handler)(const command_rt_t* parent, int argc, char **argv);
 
-typedef void(*cmd_handler_free)(int argc, char **argv);
-typedef void(*flag_handler_free)(int argc, char **argv);
+typedef void(*cmd_handler_free)(const command_rt_t* self, int argc, char **argv);
+typedef void(*flag_handler_free)(const command_rt_t* parent, int argc, char **argv);
 
 union cmd_handler_u{
         cmd_handler mem;
@@ -97,6 +98,7 @@ struct command_rt_t {
         const flag_t* flags[MAX_FLAGS]; 
         uint8_t flag_count;
         int id;
+        bool is_user;
 };
 
 
@@ -160,6 +162,21 @@ public:
     void puts_ro(const char* p);
     void puts_many_ro(const char* first, ...);
 
+    //color coded puts for special identifiers
+    void puts_name(command_rt_t* cmd);
+    void puts_err(const char* err);
+    void puts_flag(const char* name);
+
+    //user helper funcs
+    void execute(const command_rt_t* cmd, int argc, char** argv);
+    const flag_t* find_flag(const command_rt_t* cmd, const char* n);
+    bool has_flag(int argc, char **argv, const char* f);    //check if user input has flag argument
+    void dispatch_flag(const command_rt_t* parent, const flag_t* flag, int argc, char** argv);
+    const char* get_opt(int argc, char** argv, const char* opt);    //returns cmd or flag parameter
+
+
+    void error(const char* msg);
+
     /*! \name Legacy functions
      *  \brief Non-blocking/blocking char input
      * @{*/
@@ -190,14 +207,15 @@ private:
     command_rt_t* get_cmd(const char* name);
     const flag_t* const* get_cmd_flags(const char* parent);
     //command handler functions
-    void cmd_help(int argc, char **argv);
-    void cmd_debug(int argc, char **argv);
-    void cmd_print(int argc, char **argv);
-    void cmd_led(int argc, char **argv);
+    void cmd_help(const command_rt_t* self, int argc, char **argv);
+    void cmd_debug(const command_rt_t* self, int argc, char **argv);
+    void cmd_print(const command_rt_t* self, int argc, char **argv);
+    void cmd_led(const command_rt_t* self, int argc, char **argv);
     //flag handler functions
     //help flags
-    void f_help_long(int argc, char **argv);
-    void f_help_c(int argc, char **argv);
+    void f_help_long(const command_rt_t* parent, int argc, char **argv);
+    void f_help_c(const command_rt_t* parent, int argc, char **argv);
+    void f_led_blink(const command_rt_t* parent, int argc, char **argv);
 
     command_rt_t* parse_command(char *buffer);
     int tokenizer(char *buf, char **argv, int max_args);
@@ -228,4 +246,8 @@ private:
         nullptr                                 \
     };
 
-    
+#define PUT(s) puts_const(s)
+#define PUTLN(s) puts_many(s, "\r\n", nullptr)
+#define PUTP(s) puts_ro(s)
+#define PUTLNP(s) puts_many_ro(s, ROSTR("\r\n"), nullptr)
+#define SH_USR_CMD(name) name(const command_rt_t* self, int argc, char** argv)
