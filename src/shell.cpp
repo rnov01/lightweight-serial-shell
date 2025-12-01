@@ -2,6 +2,7 @@
 #include "../include/usart.h"
 #include "../include/ring_buffer.h"
 #include "../include/ro.h"
+#include "../include/colors.h"
 #include <string.h>
 
 ringbuf GLOBAL_BUFFER = {{0}, 0, 0};
@@ -10,10 +11,19 @@ shell::shell(USART* interface) : _interface(interface) {
     puts_ro(ROSTR("\r\n...shell active...\r\n"));
 }
 
-void shell::init(const command_t* user_cmds = nullptr, const flag_t* user_flags = nullptr) {
+
+//#####################################################################
+// #                                                                  #
+// #                      Public Methods                              #  
+// #                                                                  #  
+//#####################################################################
+
+
+void shell::init(const command_def_t* user_cmds, const flag_t* user_flags) {
     final_count = 0;
     build_cmd_table(cmd);
     build_cmd_table(user_cmds);
+    build_flag_links(sys_flags);
     build_flag_links(user_flags);
 }
 
@@ -21,27 +31,34 @@ void shell::tick() {
 
 }
 
-command_id_t shell::poll() {
+int shell::poll() {
     uint8_t c;
 
     if (!buf_pop(&GLOBAL_BUFFER, &c))   //no data available
-        return NONE;
-    if (c == '\r' || c == '\n') {       //end of command
+        return 0;
+    if (c == '\r' || c == '\n') {       //end of command   
         if(line_len > 0) {
             sh_line[line_len] = '\0';       //terminate str
-            line_len = 0;                   //reset 
+            //line_len = 0;                   //reset 
 
             _argc = tokenizer(sh_line, _argv, MAX_ARGS);    
-            command_id_t cmd = parse_command(sh_line);
-
-            if (cmd == err) {
-                puts_ro(ROSTR("Invalid command.\r\nType help -long for a list of commands and their descriptions"));
-            }
-            if(true) {              //change this to monitor system status (if not busy)
-                execute(cmd);
+            command_rt_t* cmd = parse_command(_argv[0]);
+            //puts_const(sh_line);              debug readouts
+            //puts_const(cmd->def->name);
+            if (!cmd) {
+               puts_ro(ROSTR("Invalid command.\r\nType help -long for a list of commands and their descriptions"));
+            } else {
+                if (cmd->type == MEMBER_H) {
+                    (this->*(cmd->exe.mem))(_argc, _argv);
+                } else {
+                    cmd->exe.free(_argc, _argv);
+                }
+                
             }
         }
-        return NONE;        //newline w/ no data -> ignore
+        line_len = 0;  
+        memset(sh_line, 0, sizeof(sh_line));
+        return 1;        //newline w/ no data -> ignore
     }
 
     if (line_len < sizeof(sh_line) - 1) {    //append single char if space available
@@ -50,10 +67,10 @@ command_id_t shell::poll() {
 
     if (c == '\b' && line_len > 0) {        //delete last char if backspace is pressed
     line_len--;
-    return NONE;
+    return 2;
     }
 
-    return NONE;
+    return 3;
 }
 
 void shell::puts(char* s) {
@@ -103,20 +120,45 @@ char shell::bget() {
     return 0;
 }
 
-static const str_to_cmd COMMAND_LUT[] = {
-    {"help", command_id_t::HELP},
-    {"debug", command_id_t::DEBUG},
-    {"print", command_id_t::PRINT},
-    {"led", command_id_t::LED},
-    {nullptr, command_id_t::err}
-};
 
-void shell::build_cmd_table(const command_t* table) {
+//#####################################################################
+// #                                                                  #
+// #                      Private Methods                             #  
+// #                                                                  #  
+//#####################################################################
+
+
+void shell::build_cmd_table(const command_def_t* table) {
     if (!table) return;
-
+    
     for(int i=0; table[i].name != nullptr; i++) {
+        //check for duplicates
+        bool exists = false;
+        for(int j=0; j<final_count; j++) {
+            if(strcmp(table[i].name, final_cmd[j].def->name) == 0) {
+                exists = true;
+                break;
+            }
+        }
+        if (exists) continue;
         if (final_count < MAX_CMD) {
-            final_cmd[final_count++] = &table[i];
+            final_cmd[final_count].def = &table[i];
+            final_cmd[final_count].type = table[i].type;
+
+            if (table[i].type == MEMBER_H) {
+                final_cmd[final_count].exe.mem = table[i].exe.mem;
+            } else {
+                final_cmd[final_count].exe.free = table[i].exe.free;
+            }
+            
+            final_cmd[final_count].flag_count = 0;
+            final_cmd[final_count].id = final_count;
+            
+            //clr flags (populate by build flag links)
+            for(int k=0; k<MAX_FLAGS; k++) {
+                final_cmd[final_count].flags[k] = nullptr;
+            }
+            final_count++;
         }
     }
 }
@@ -124,29 +166,31 @@ void shell::build_cmd_table(const command_t* table) {
 void shell::build_flag_links(const flag_t* table) {
     if (!table) return;
 
-    for(int f=0; table[f].name != nullptr) {
+    for(int f=0; table[f].name != nullptr; f++) {
         //match with parent command
         for(int c=0; c < final_count; c++) {
-            if (strcmp(table[f].parent, final_cmd[c]->name) == 0) {
-                attach_flag_to_command(final_cmd[c], &table[f]);
+            const char* cmd_name = final_cmd[c].def->name;
+            if (strcmp(table[f].parent, cmd_name) == 0) {
+                attach_flag_to_command(&final_cmd[c], &table[f]);
             }
         }
     }
 }
 
-void shell::attach_flag_to_command(command_t* cmd, const flag_t* flag) {
+void shell::attach_flag_to_command(command_rt_t* cmd, const flag_t* flag) {
     if (cmd->flag_count < MAX_FLAGS) {
         cmd->flags[cmd->flag_count++] = flag;
+        cmd->flags[cmd->flag_count] = nullptr;
     }
 }
 
-command_id_t shell::parse_command(char *buffer) {
-    for (int i=0; cmd[i].name != nullptr; i++) {
-        if (strcmp(buffer, cmd[i].name) == 0) {
-            return cmd[i].id;
+command_rt_t* shell::parse_command(char *buffer) {
+    for (int i=0; i < final_count; i++) {
+        if (strcmp(buffer, final_cmd[i].def->name) == 0) {
+            return &final_cmd[i];
         }
     }
-    return command_id_t::err;
+    return nullptr;
 }
 
 int shell::tokenizer(char *buf, char **argv, int max_args) {
@@ -160,27 +204,45 @@ int shell::tokenizer(char *buf, char **argv, int max_args) {
     return argc;
 }
 
-void shell::execute(command_id_t cmd_x) {
-    switch (cmd_x) {
-        case HELP:
-            (this->*(cmd[cmd_x].exe))(_argc, _argv);
-            break;
-        case LED:
-            //toggle(PIN_B7);
-            (this->*(cmd[cmd_x].exe))(_argc, _argv);
-            break;
-   
+command_rt_t* shell::get_cmd(const char* name) {
+    for(int i=0; i<final_count; i++) {
+        if (strcmp(name, final_cmd[i].def->name) == 0) {
+            return &final_cmd[i];
+        }
     }
+    return nullptr;
 }
+
+const flag_t* const* shell::get_cmd_flags(const char* parent) {
+    command_rt_t* cmd = get_cmd(parent);
+    if (!cmd) return nullptr;
+    return cmd->flags;
+}
+
+//#####################################################################
+// #                                                                  #
+// #                      Handler Functions                           #  
+// #                                                                  #  
+//#####################################################################
+
 
 //help flags
 void shell::f_help_long(int argc, char **argv) {
-    puts_ro(ROSTR("Full command descriptions:\r\n"));
-    for(int i=0; cmd[i].name != nullptr; i++) {
-        puts_const(cmd[i].name);
-        puts_many_ro(ROSTR(" - "), cmd[i].description, ROSTR("\r\n"), nullptr); 
+    puts_ro(ROSTR("\r\nFull command descriptions:\r\n"));
+    for(int i=0; i < final_count; i++) {
+        if (final_cmd[i].def->in_progmem) {
+            puts_many(CCYA, final_cmd[i].def->name, C_, nullptr);
+            puts_many_ro(ROSTR(" - "), final_cmd[i].def->description, ROSTR("\r\n"), nullptr);
+        }
+        else {
+            puts_const(final_cmd[i].def->name);
+            puts_ro(ROSTR(" - "));
+            puts_const(final_cmd[i].def->description);
+            puts_ro(ROSTR("\r\n"));
+        }
+         
     }
-    puts_const(ROSTR("\r\nUse -c <command> to list flags for a specific command\r\n"));
+    puts_ro(ROSTR("\r\nUse -c <command> to list flags for a specific command\r\n"));
 }
 
 void shell::f_help_c(int argc, char **argv) {
@@ -189,25 +251,24 @@ void shell::f_help_c(int argc, char **argv) {
         return;
     }
     const char* target = argv[2];
-    for(int a=0; cmd[a].name != nullptr; a++) {
-        if (strcmp(target, cmd[a].name)==0) {
+    for(int a=0; a<final_count; a++) {
+        if (strcmp(target, final_cmd[a].def->name) == 0) {
             puts_ro(ROSTR("\r\nFlags available for command: ")); 
-            puts_ro(ROSTR("\x1B[34m"));
-            puts_const(cmd[a].name);
-            puts_ro(ROSTR("\x1B[0m\r\n\r\n"));
-    
+            puts_const(CCYA);
+            puts_const(final_cmd[a].def->name);
+            puts_many(C_, "\r\n\r\n", nullptr);
 
-            const flag_t* flags = cmd[a].flags;
+            const flag_t* const* flags = final_cmd[a].flags;
 
-            if(!flags || flags[0].name == nullptr) {
+            if(!flags || flags[0] == nullptr || flags[0]->name == nullptr) {
                 puts_ro(ROSTR("None\r\n"));
                 return;
             }
-            for (int b=0; flags[b].name != nullptr; b++) {
+            for (int b=0; flags[b] != nullptr; b++) {
                 puts_ro(ROSTR("\x1B[32m"));
-                puts_const(flags[b].name);
+                puts_const(flags[b]->name);
                 puts_ro(ROSTR("\x1B[0m"));
-                puts_many_ro(ROSTR(" >> "), flags[b].description, ROSTR("\r\n"), nullptr);
+                puts_many_ro(ROSTR(" >> "), flags[b]->description, ROSTR("\r\n"), nullptr);
             }
             return;
         }
@@ -219,13 +280,32 @@ void shell::f_help_c(int argc, char **argv) {
 
 void shell::cmd_help(int argc, char **argv) {
     if (argc == 1) {
-        puts_ro(ROSTR("Here is a list of system commands:\r\n"));
+        puts_ro(ROSTR("\r\nHere is a list of system commands:\r\n"));
         puts_ro(ROSTR("----------------------------------\r\n"));
-        for (int i=0; cmd[i].name != nullptr; i++) {
-                puts((char*)cmd[i].name);
-                puts_ro(ROSTR("\r\n"));
+        for (int i=0; i<final_count; i++) {
+            puts_many(CCYA, final_cmd[i].def->name, C_, "\r\n", nullptr);
             }
-    } else if (argc > 1) {
+            
+            return;
+    } 
+    
+    //argc>1
+    const char* flagname = argv[1];
+    const flag_t* const* flags = get_cmd_flags("help");
+
+    if (!flags) {
+        puts_ro(ROSTR("Help command has no flags"));
+        return;
+    }
+
+    for(int i=0; flags[i] != nullptr; i++) {
+        if(strcmp(flagname, flags[i]->name) == 0) {
+            (this->*(flags[i]->exe))(argc, argv);
+            return;
+        }
+    }
+    puts_ro(ROSTR("Unknown help flag\r\n"));
+    /*else if (argc > 1) {
         for (int i=1; i<argc; i++) {
             for (int j=0; help_flags[j].name != nullptr; j++) {
                 if (strcmp(argv[i], help_flags[j].name)==0) {
@@ -234,7 +314,7 @@ void shell::cmd_help(int argc, char **argv) {
                 }
             }
         }
-    }
+    }*/
 }
 
 void shell::cmd_debug(int argc, char **argv) {

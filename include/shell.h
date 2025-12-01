@@ -24,6 +24,10 @@ struct str_to_cmd {
     const char* name;
     command_id_t cmd; 
 };
+struct _err {
+    int err_id;
+    const char* message;
+};
 
 // Forward declaration of shell class
 class shell;
@@ -41,6 +45,18 @@ typedef void (shell::*cmd_handler)(int argc, char **argv);
  *  \param argv Array of pointers to parsed argument strings */
 typedef void (shell::*flag_handler)(int argc, char **argv);
 
+typedef void(*cmd_handler_free)(int argc, char **argv);
+typedef void(*flag_handler_free)(int argc, char **argv);
+
+union cmd_handler_u{
+        cmd_handler mem;
+        cmd_handler_free free;
+    };
+
+enum handler_type_t {       //member handler function for system commands, free handler functions for user cmds
+    MEMBER_H, FREE_H
+};
+
 /*! \struct flag_t 
  *  \brief Describes a single flag (subcommand) associated with a primary command
  *  \details Each command that accepts flags must have an associated flag_t lookup table containing one 
@@ -54,6 +70,7 @@ struct flag_t {
     const char* description;
     flag_handler exe;
     const char* parent;
+    bool in_progmem;
 };
 
 /*! /struct command_t 
@@ -64,21 +81,27 @@ struct flag_t {
  *  \param exe A pointer to the primary cmd_* handler for this command
  *  \param id Command ID for backend execution
  *  \param flags A pointer to an array of flag_t structs, or nullptr if the command has no flags */
-struct command_t {      //order identical as enum for easy lookup
+struct command_def_t {      //order identical as enum for easy lookup
     const char* name;
     const char* description;
-    cmd_handler exe;
-    command_id_t id;
-    const flag_t* flags[MAX_FLAGS]; //max 8 flags/cmd
-    uint8_t flag_count;
+    handler_type_t type;
+    cmd_handler_u exe;
+    bool in_progmem;
 };
 
-/*! \name User-defined command grabbers
- * @{
- */
-extern const command_t __start_shell_cmds[];
-extern const command_t __stop_shell_cmds[];
-///@}
+//runtime mutable struct
+struct command_rt_t {               
+        const command_def_t* def;   //immutable definition
+        handler_type_t type;
+        cmd_handler_u exe;
+        const flag_t* flags[MAX_FLAGS]; 
+        uint8_t flag_count;
+        int id;
+};
+
+
+
+
 
 /*! \name f_lut Flag lookup table declarations 
  *  \brief One table is defined for each command that supports flags. For commands without flags, the
@@ -105,7 +128,7 @@ public:
     shell(USART* interface);
     /*!
     */
-    void init( const command_t* user_cmds = nullptr, const flag_t* user_flags = nullptr );
+    void init(const command_def_t* user_cmds = nullptr, const flag_t* user_flags = nullptr);
     /*! \fn tick()
      *  \brief Placeholder periodic update hook
      *  \note Currently unused */
@@ -115,7 +138,7 @@ public:
      *  \details When a complete command is detected (terminated by a newline), the line is tokenized, parsed, 
      *  and executed. 
      *  \return The command_id_t of the parsed command or NONE if no command is detected */
-    command_id_t poll();
+    int poll();
     /*! \fn puts(char* s) 
      *  \brief Used to transmit a mutable string
       * \param s A string (pointer to char array)*/
@@ -153,13 +176,19 @@ private:
     char *_argv[MAX_ARGS];
     int _argc = 0;
 
-    void build_cmd_table(const command_t* table);   //combines built-in lut with any user defined commands
+    void build_cmd_table(const command_def_t* table);   //combines built-in lut with any user defined commands
     void build_flag_links(const flag_t* table);
-    void attach_flag_to_command(command_t* cmd, const flag_t* flag);
+    void build_sys_flag_links(void);
+    void attach_flag_to_command(command_rt_t* cmd, const flag_t* flag);
     static const int MAX_CMD = 50;
-    const command_t* final_cmd[MAX_CMD];
+    command_rt_t final_cmd[MAX_CMD];
     int final_count = 0;
 
+    const _err* err_msg[];
+
+    //get functions
+    command_rt_t* get_cmd(const char* name);
+    const flag_t* const* get_cmd_flags(const char* parent);
     //command handler functions
     void cmd_help(int argc, char **argv);
     void cmd_debug(int argc, char **argv);
@@ -170,15 +199,16 @@ private:
     void f_help_long(int argc, char **argv);
     void f_help_c(int argc, char **argv);
 
-    command_id_t parse_command(char *buffer);
+    command_rt_t* parse_command(char *buffer);
     int tokenizer(char *buf, char **argv, int max_args);
-    void execute(command_id_t cmd_x);
    
-    static const command_t cmd[NUM_CMDS+1];
+    static const command_def_t cmd[NUM_CMDS+1];
+    //struct command_runtime_t 
     static const flag_t help_flags[];
     static const flag_t debug_flags[];
     static const flag_t print_flags[];
     static const flag_t led_flags[];
+    static const flag_t sys_flags[];
 };
 
 #define puts_many_(sh, ...) \
@@ -197,3 +227,5 @@ private:
         flags,                                  \
         nullptr                                 \
     };
+
+    

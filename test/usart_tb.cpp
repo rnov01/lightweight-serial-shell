@@ -2,6 +2,7 @@
 #include "../include/pin.h"
 #include "../include/ring_buffer.h"
 #include "../include/shell.h"
+#include "../include/user_commands.h"
 #include <stdint.h>
 #include <avr/delay.h>
 #include <avr/pgmspace.h>
@@ -78,7 +79,7 @@ int run_usart_test() {
         set_output(PIN_G0);
         
         set_output(PIN_B7);
-
+        sh.init(usr_cmds, usr_flags);
     while (1) {
         sh.poll();
        

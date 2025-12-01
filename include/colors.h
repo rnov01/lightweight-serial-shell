@@ -1,9 +1,11 @@
+#define __COLOR_ON__
 
 #if defined(__COLOR_ON__)
-    #define COLOR_CYAN   "\x1B[36m"
-    #define COLOR_YELLOW "\x1B[33m"
-    #define COLOR_GREEN  "\x1B[32m"
-    #define COLOR_RED    "\x1B[31m"
+    #define CCYA   "\x1B[36m"   //cyan
+    #define CYEL"\x1B[33m"      //yellow
+    #define CGRN  "\x1B[32m"    //green 
+    #define CRED    "\x1B[31m"  //red
+    #define C_ "\x1B[0m"    //rst
     #define COLOR_RESET  "\x1B[0m"
 #else 
     #define COLOR_CYAN  
