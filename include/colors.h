@@ -11,3 +11,4 @@
     #define COLOR_GREEN  
     #define COLOR_RED    
     #define COLOR_RESET  
+#endif

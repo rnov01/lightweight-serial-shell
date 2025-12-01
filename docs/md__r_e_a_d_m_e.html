@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.14.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Lightweight Embedded Serial Shell: AVR USART Drivers</title>
+<title>Lightweight Embedded Serial Shell: Lightweight Embedded Serial Shell</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -90,27 +90,227 @@ $(function(){initNavTree('md__r_e_a_d_m_e.html','',''); });
 </div>
 
 <div><div class="header">
-  <div class="headertitle"><div class="title">AVR USART Drivers </div></div>
+  <div class="headertitle"><div class="title">Lightweight Embedded Serial Shell </div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p><a class="anchor" id="autotoc_md0"></a></p>
-<p>Semi hardware-abstracted <a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a> drivers for AVR devices.</p>
-<hr  />
- <h1 class="doxsection"><a class="anchor" id="autotoc_md2"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md1"></a>
 Overview</h1>
-<p>A modular <a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a> driver that is hardware agnostic within the AVR chip family. The files <a class="el" href="usart_8h.html">usart.h</a> and <a class="el" href="usart_8cpp.html">usart.cpp</a> define a '<a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a>' class used to create hardware-backed <a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a> objects. Member functions include basic <a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a> capabilities like read and write.</p>
-<p>The file <a class="el" href="pin_8h.html">pin.h</a> defines a 'pin' struct for hardware-abstracted GPIO access. The 'PIN_LIST' macro expands all ATMEGA2560 pins automatically. This list can be adjusted for other AVR chips as needed.</p>
+<p>This project implements a lightweight command-line shell for microcontrollers. <br  />
+ The shell operates over a serial interface (typically <a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a>) and provides a minimal terminal for interacting with a microcontroller without requiring a full RTOS or filesystem.</p>
+<p>This design focuses on:</p>
+<ul>
+<li>low resource usage <br  />
+</li>
+<li>non-blocking behavior for simple integration <br  />
+</li>
+</ul>
+<p>The shell supports user-defined commands and flags/subcommands, allowing firmware developers to expose debugging tools, configuration interfaces, and system features through a familiar terminal-style syntax.</p>
+<hr  />
 <h1 class="doxsection"><a class="anchor" id="autotoc_md3"></a>
-Compilation Info</h1>
-<pre class="fragment">This software was compiled using:
-- **avr-gcc**
-- **avrdude**
-- **GNU make**
-</pre><h1 class="doxsection"><a class="anchor" id="autotoc_md4"></a>
-Documentation</h1>
-<pre class="fragment">More information can be found [here](https://rnov01.github.io/avr-hal-usart/index.html)
-</pre> <hr  />
- </div></div><!-- contents -->
+Key Features</h1>
+<ul>
+<li><b>Configurable commands</b> <br  />
+ Commands can be added by inserting an entry in the command lookup table and creating a matching <span class="tt">cmd_*</span> handler function.</li>
+<li><b>Flag-based subcommands</b> <br  />
+ Flags are defined per command in their own lookup tables and implemented with <span class="tt">f_*</span> handler functions.</li>
+<li><b>Hardware flexibility</b> <br  />
+ The shell itself is hardware agnostic; only the serial driver layer is MCU-specific.</li>
+</ul>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
+Architecture</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
+1. Input Buffer and Tokenizer</h2>
+<p>Characters arriving from the serial backend accumulate in a global ring buffer. <br  />
+ When the system is available, <span class="tt"><a class="el" href="classshell.html#a74723ac80737b26b155430bd4e907116" title="Polls the global ring buffer for new characters.">shell::poll()</a></span> transfers characters from the ring buffer into the shell’s input buffer (<span class="tt">sh_line[]</span>). Once a command terminator is received, the tokenizer splits it into:</p>
+<ul>
+<li>base command <br  />
+</li>
+<li>flags (optional) <br  />
+</li>
+<li>arguments (optional)</li>
+</ul>
+<p>Tokens are stored in <span class="tt">argv[]</span>. <br  />
+ Tokens remain stored in-place in the input buffer, with the tokenizer inserting &lsquo;&rsquo;\0'` to delimit substrings.</p>
+<hr  />
+<h2 class="doxsection"><a class="anchor" id="autotoc_md8"></a>
+2. Command / Flag Lookup Tables</h2>
+<p>Commands are parsed from <span class="tt">argv[0]</span> and compared against the static command lookup table. <br  />
+ Each entry contains:</p>
+<ul>
+<li>command name <br  />
+</li>
+<li>help description <br  />
+</li>
+<li>pointer to the command handler <br  />
+</li>
+<li>command ID <br  />
+</li>
+<li>pointer to an associated flag table (optional)</li>
+</ul>
+<p>Only a command’s <span class="tt">cmd_*</span> handler invokes its <span class="tt">f_*</span> flag handlers. <br  />
+ Arguments appear after flags in <span class="tt">argv[]</span> and may be interpreted as needed.</p>
+<p>Lookup is linear (O(N)) for minimal overhead.</p>
+<hr  />
+<h2 class="doxsection"><a class="anchor" id="autotoc_md10"></a>
+3. Command / Flag Handlers</h2>
+<p>Each command implements a <span class="tt">cmd_*</span> handler. <br  />
+ Optional flags are implemented with <span class="tt">f_*</span> handler functions.</p>
+<p>A command handler:</p>
+<ul>
+<li>validates arguments <br  />
+</li>
+<li>dispatches flags if present <br  />
+</li>
+<li>performs the command’s primary behavior <br  />
+</li>
+</ul>
+<p>Any number of flags may be defined per command; however, <b>only one flag may be used at a time</b>.</p>
+<p>Flag handlers execute only the behavior associated with the flag. They are invoked exclusively by their command’s handler.</p>
+<hr  />
+<h2 class="doxsection"><a class="anchor" id="autotoc_md12"></a>
+Buffering Model</h2>
+<p>The shell uses two buffering layers:</p>
+<ol type="1">
+<li><b>Global ring buffer</b> – fed by the serial backend (typically the RX interrupt) <br  />
+</li>
+<li><b>Input buffer (<span class="tt">sh_line[]</span>)</b> – parsed and tokenized by the shell <br  />
+</li>
+</ol>
+<p><span class="tt">argv[0]</span> always contains the base command. <br  />
+ <span class="tt">argv[1..n]</span> contain flags and arguments.</p>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md14"></a>
+Typical Usage</h1>
+<p>Examples of supported command patterns:</p>
+<div class="fragment"><div class="line">help</div>
+<div class="line">help -long</div>
+<div class="line">help -c led</div>
+<div class="line"> </div>
+<div class="line">print &quot;hello world&quot;</div>
+<div class="line"> </div>
+<div class="line">debug -on</div>
+</div><!-- fragment --><p><b>Only one flag may be passed at a time.</b></p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md15"></a>
+Adding a New Command</h2>
+<ol type="1">
+<li>Write a <span class="tt">cmd_*</span> handler <br  />
+</li>
+<li>Add a command entry in <span class="tt">shell::cmd[]</span> <br  />
+</li>
+<li>(Optional) Create a flag table and <span class="tt">f_*</span> handlers <br  />
+</li>
+</ol>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md17"></a>
+Integration</h1>
+<p>A minimal integration example:</p>
+<div class="fragment"><div class="line"><a class="code hl_class" href="class_u_s_a_r_t.html">USART</a> serial_0;</div>
+<div class="line"><a class="code hl_class" href="classshell.html">shell</a> sh(&amp;serial_0);</div>
+<div class="line"> </div>
+<div class="line"><span class="keywordflow">while</span> (1) {</div>
+<div class="line">    sh.poll();  <span class="comment">// process input and execute commands</span></div>
+<div class="line">}</div>
+<div class="ttc" id="aclass_u_s_a_r_t_html"><div class="ttname"><a href="class_u_s_a_r_t.html">USART</a></div><div class="ttdoc">Interface for AVR USART operation.</div><div class="ttdef"><b>Definition</b> usart.h:42</div></div>
+<div class="ttc" id="aclassshell_html"><div class="ttname"><a href="classshell.html">shell</a></div><div class="ttdoc">Driver class for the serial shell interface.</div><div class="ttdef"><b>Definition</b> shell.h:90</div></div>
+</div><!-- fragment --><p>The shell is transport-agnostic. <br  />
+ Any backend capable of providing characters to the shell will work.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
+Typical Backend Model</h2>
+<p>In the included AVR example:</p>
+<ul>
+<li>The <a class="el" href="class_u_s_a_r_t.html" title="Interface for AVR USART operation.">USART</a> RX ISR stores incoming bytes in the global ring buffer <br  />
+</li>
+<li><span class="tt"><a class="el" href="classshell.html#a74723ac80737b26b155430bd4e907116" title="Polls the global ring buffer for new characters.">shell::poll()</a></span> reads from the ring buffer and assembles the command in <span class="tt">sh_line[]</span> <br  />
+</li>
+<li>When a newline is detected, the command is tokenized and executed</li>
+</ul>
+<p>To use the shell without a ring buffer, <span class="tt">poll()</span> must be modified to read from another backend.</p>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md19"></a>
+Backend Requirements</h2>
+<ul>
+<li>A function (ISR or polling function) that pushes incoming characters into the shell <br  />
+</li>
+<li><p class="startli">A serial driver providing at minimum:</p>
+<div class="fragment"><div class="line">put_string(<span class="keywordtype">char</span>*)</div>
+</div><!-- fragment --><p class="startli">and optionally:</p>
+<div class="fragment"><div class="line">receive()</div>
+</div><!-- fragment --></li>
+<li>A main loop that repeatedly calls <span class="tt">poll()</span></li>
+</ul>
+<hr  />
+<h1 class="doxsection"><a class="anchor" id="autotoc_md21"></a>
+Code Examples</h1>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md22"></a>
+Command ID Enum Entry</h2>
+<div class="fragment"><div class="line"><span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line">    <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">HELP</a>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12">LED</a>,</div>
+<div class="line">    <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac157bdf0b85a40d2619cbc8bc1ae5fe2">NONE</a>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">err</a>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ae2b9f991b7d1102a628eb677f83f89e6">NUM_CMDS</a></div>
+<div class="line">} <a class="code hl_enumeration" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a>;</div>
+<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a></div><div class="ttdeci">command_id_t</div><div class="ttdef"><b>Definition</b> commands.h:4</div></div>
+<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12">LED</a></div><div class="ttdeci">@ LED</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
+<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">HELP</a></div><div class="ttdeci">@ HELP</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
+<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2ac157bdf0b85a40d2619cbc8bc1ae5fe2"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac157bdf0b85a40d2619cbc8bc1ae5fe2">NONE</a></div><div class="ttdeci">@ NONE</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
+<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">err</a></div><div class="ttdeci">@ err</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
+<div class="ttc" id="acommands_8h_html_ab73a326523c6a0ec9bb287cf70c33ca2ae2b9f991b7d1102a628eb677f83f89e6"><div class="ttname"><a href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ae2b9f991b7d1102a628eb677f83f89e6">NUM_CMDS</a></div><div class="ttdeci">@ NUM_CMDS</div><div class="ttdef"><b>Definition</b> commands.h:5</div></div>
+</div><!-- fragment --><p>Insert new command IDs before <span class="tt">NONE</span>. <br  />
+ The last three values should always be <span class="tt">NONE</span>, <span class="tt">err</span>, and <span class="tt">NUM_CMDS</span>.</p>
+<hr  />
+<h2 class="doxsection"><a class="anchor" id="autotoc_md24"></a>
+Command Table Entry</h2>
+<div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="structcommand__t.html">command_t</a> shell::cmd[] = {</div>
+<div class="line">    {<span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Show list of supported commands&quot;</span>, &amp;shell::cmd_help, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">HELP</a>, <a class="code hl_variable" href="shell_8h.html#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a>},</div>
+<div class="line">    {<span class="stringliteral">&quot;led&quot;</span>,  <span class="stringliteral">&quot;Toggle onboard LED&quot;</span>, &amp;shell::cmd_led, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12">LED</a>, <span class="keyword">nullptr</span>},</div>
+<div class="line">    {<span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">err</a>, <span class="keyword">nullptr</span>}</div>
+<div class="line">};</div>
+<div class="ttc" id="ashell_8h_html_a865d62d968934bf5e3a8deeea9d8dbf2"><div class="ttname"><a href="shell_8h.html#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a></div><div class="ttdeci">const flag_t help_flags[]</div></div>
+<div class="ttc" id="astructcommand__t_html"><div class="ttname"><a href="structcommand__t.html">command_t</a></div><div class="ttdoc">Struct defining the lookup table entry for each system command.</div><div class="ttdef"><b>Definition</b> commands.h:18</div></div>
+</div><!-- fragment --><p>This table must be defined <b>exactly once</b> in <span class="tt"><a class="el" href="lut_8cpp.html">lut.cpp</a></span>.</p>
+<hr  />
+<h2 class="doxsection"><a class="anchor" id="autotoc_md26"></a>
+Flag Table Entry</h2>
+<div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="structflag__t.html">flag_t</a> <a class="code hl_variable" href="shell_8h.html#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a>[] = {</div>
+<div class="line">    { <span class="stringliteral">&quot;-long&quot;</span>, <span class="stringliteral">&quot;Show command descriptions&quot;</span>, &amp;shell::f_help_long },</div>
+<div class="line">    { <span class="stringliteral">&quot;-c&quot;</span>,    <span class="stringliteral">&quot;Show flags for a command&quot;</span>, &amp;shell::f_help_c },</div>
+<div class="line">    { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div>
+<div class="line">};</div>
+<div class="ttc" id="astructflag__t_html"><div class="ttname"><a href="structflag__t.html">flag_t</a></div><div class="ttdoc">Describes a single flag (subcommand) associated with a primary command.</div><div class="ttdef"><b>Definition</b> shell.h:51</div></div>
+</div><!-- fragment --><p>Flag tables should also be defined in <span class="tt"><a class="el" href="lut_8cpp.html">lut.cpp</a></span>.</p>
+<hr  />
+<h2 class="doxsection"><a class="anchor" id="autotoc_md28"></a>
+Command Handler Example</h2>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> shell::cmd_help(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv) {</div>
+<div class="line">    <span class="keywordflow">if</span> (argc == 1) {</div>
+<div class="line">        <a class="code hl_function" href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">puts_const</a>(<span class="stringliteral">&quot;Available commands:\r\n&quot;</span>);</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; <a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name != <span class="keyword">nullptr</span>; i++) {</div>
+<div class="line">            <a class="code hl_function" href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">puts_many</a>(<a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name, <span class="stringliteral">&quot;\r\n&quot;</span>, <span class="keyword">nullptr</span>);</div>
+<div class="line">        }</div>
+<div class="line">    } <span class="keywordflow">else</span> {</div>
+<div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 1; i &lt; argc; i++) {</div>
+<div class="line">            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = 0; help_flags[j].name != <span class="keyword">nullptr</span>; j++) {</div>
+<div class="line">                <span class="keywordflow">if</span> (strcmp(argv[i], help_flags[j].name) == 0) {</div>
+<div class="line">                    (this-&gt;*(help_flags[j].exe))(argc, argv);</div>
+<div class="line">                    <span class="keywordflow">return</span>;</div>
+<div class="line">                }</div>
+<div class="line">            }</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+<div class="ttc" id="aclassshell_html_a0ef2577e3593b6625c8727b10f33850b"><div class="ttname"><a href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">shell::puts_many</a></div><div class="ttdeci">void puts_many(const char *first,...)</div><div class="ttdoc">Print multiple concatenated strings separated by commmas.</div><div class="ttdef"><b>Definition</b> shell.cpp:73</div></div>
+<div class="ttc" id="aclassshell_html_a7be2bdd33c2361aa8ce54253a678601e"><div class="ttname"><a href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">shell::puts_const</a></div><div class="ttdeci">void puts_const(const char *s)</div><div class="ttdoc">Used to trasmit constant string (string literal)</div><div class="ttdef"><b>Definition</b> shell.cpp:70</div></div>
+<div class="ttc" id="acommands_8h_html_ae265a4132f212d84a4a0ebe470bdb977"><div class="ttname"><a href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a></div><div class="ttdeci">const command_t cmd[NUM_CMDS]</div><div class="ttdef"><b>Definition</b> commands.h:28</div></div>
+</div><!-- fragment --><hr  />
+<h2 class="doxsection"><a class="anchor" id="autotoc_md30"></a>
+Flag Handler Example</h2>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> shell::f_help_long(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv) {</div>
+<div class="line">    <a class="code hl_function" href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">puts_const</a>(<span class="stringliteral">&quot;Full command descriptions:\r\n&quot;</span>);</div>
+<div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; <a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name != <span class="keyword">nullptr</span>; i++) {</div>
+<div class="line">        <a class="code hl_function" href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">puts_many</a>(<a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name, <span class="stringliteral">&quot; - &quot;</span>, <a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].description, <span class="stringliteral">&quot;\r\n&quot;</span>, <span class="keyword">nullptr</span>);</div>
+<div class="line">    }</div>
+<div class="line">    <a class="code hl_function" href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">puts_const</a>(<span class="stringliteral">&quot;\r\nUse -c &lt;command&gt; to list flags for a specific command\r\n&quot;</span>);</div>
+<div class="line">}</div>
+</div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->
 </div><!-- doc-content -->
 </div><!-- container -->

@@ -1,17 +1,18 @@
 #include "../include/shell.h"
+#include "../include/descriptions.h"
 #include <string.h>
 
 /*! \name f_lut Command flag lookup tables
  * @{
  */
 const flag_t shell::help_flags[] = {
-    {"-long", "Gives a short description of each available command", &shell::f_help_long},
-    {"-c", "-c <command> provides a list of flags available for the specified command", &shell::f_help_c},
-    {nullptr, nullptr}
+    {"-long", help_lf_d, &shell::f_help_long, help_n},
+    {"-c", help_cf_d, &shell::f_help_c, help_n},
+    {nullptr, nullptr, nullptr}
 };
 
 const flag_t shell::debug_flags[] = {
-    {"-v", "Verbose mode\r\n"},
+    {"-v", "Verbose mode", debug_n},
     {nullptr, nullptr}
 };
 
@@ -21,7 +22,7 @@ const flag_t shell::print_flags[] = {
 };
 
 const flag_t shell::led_flags[] = {
-    {"-long", "Gives a short description of each available command\r\n"},
+    {"-blink", "Gives a short description of each available command"},
     {nullptr, nullptr}
 };
 
@@ -29,9 +30,9 @@ const flag_t shell::led_flags[] = {
 //command lut
 //commands w/o flags get nullptr for flag_t arg
 const command_t shell::cmd[NUM_CMDS+1] = {
-    {"help", "Provides a list of system commands", &shell::cmd_help, HELP, help_flags},
-    {"debug", "Activates system debug mode", &shell::cmd_debug, DEBUG, debug_flags},
-    {"print", "Prints system status", &shell::cmd_print, PRINT, print_flags},
-    {"led", "Toggles the onboard LED", &shell::cmd_led, LED, led_flags},
+    {help_n, help_d, &shell::cmd_help, HELP, help_flags},
+    {debug_n, debug_d, &shell::cmd_debug, DEBUG, debug_flags},
+    {"print", print_d, &shell::cmd_print, PRINT, print_flags},
+    {"led", led_d, &shell::cmd_led, LED, led_flags},
     {nullptr, nullptr, nullptr, err}
 };

@@ -28,26 +28,45 @@ var NAVTREE =
     [ "Overview", "index.html#intro", null ],
     [ "Key Features", "index.html#features", null ],
     [ "Architecture", "index.html#design", [
-      [ "1. Input Buffer and Tokenizer", "index.html#autotoc_md9", null ],
-      [ "2. Command / Flag Lookup Tables", "index.html#autotoc_md10", null ],
-      [ "3. Command / Flag Handlers", "index.html#autotoc_md11", [
-        [ "Note", "index.html#autotoc_md12", null ]
+      [ "1. Input Buffer and Tokenizer", "index.html#autotoc_md35", null ],
+      [ "2. Command / Flag Lookup Tables", "index.html#autotoc_md36", null ],
+      [ "3. Command / Flag Handlers", "index.html#autotoc_md37", [
+        [ "Note", "index.html#autotoc_md38", null ]
       ] ]
     ] ],
     [ "Typical Usage", "index.html#usage", null ],
     [ "Integration", "index.html#integration", null ],
     [ "Code Examples", "index.html#ex", [
-      [ "Command ID Enum Entry", "index.html#autotoc_md16", null ],
-      [ "Command Table Entry", "index.html#autotoc_md17", null ],
-      [ "Flag Table Entry", "index.html#autotoc_md18", null ],
-      [ "Command Handler Function", "index.html#autotoc_md19", null ],
-      [ "Flag Handler Function (optional)", "index.html#autotoc_md20", null ]
+      [ "Command ID Enum Entry", "index.html#autotoc_md42", null ],
+      [ "Command Table Entry", "index.html#autotoc_md43", null ],
+      [ "Flag Table Entry", "index.html#autotoc_md44", null ],
+      [ "Command Handler Function", "index.html#autotoc_md45", null ],
+      [ "Flag Handler Function (optional)", "index.html#autotoc_md46", null ]
     ] ],
     [ "Compilation Info", "index.html#compinfo", null ],
-    [ "AVR USART Drivers", "md__r_e_a_d_m_e.html", [
-      [ "Overview", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
-      [ "Compilation Info", "md__r_e_a_d_m_e.html#autotoc_md3", null ],
-      [ "Documentation", "md__r_e_a_d_m_e.html#autotoc_md4", null ]
+    [ "Lightweight Embedded Serial Shell", "md__r_e_a_d_m_e.html", [
+      [ "Overview", "md__r_e_a_d_m_e.html#autotoc_md1", null ],
+      [ "Key Features", "md__r_e_a_d_m_e.html#autotoc_md3", null ],
+      [ "Architecture", "md__r_e_a_d_m_e.html#autotoc_md5", [
+        [ "1. Input Buffer and Tokenizer", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
+        [ "2. Command / Flag Lookup Tables", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
+        [ "3. Command / Flag Handlers", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+        [ "Buffering Model", "md__r_e_a_d_m_e.html#autotoc_md12", null ]
+      ] ],
+      [ "Typical Usage", "md__r_e_a_d_m_e.html#autotoc_md14", [
+        [ "Adding a New Command", "md__r_e_a_d_m_e.html#autotoc_md15", null ]
+      ] ],
+      [ "Integration", "md__r_e_a_d_m_e.html#autotoc_md17", [
+        [ "Typical Backend Model", "md__r_e_a_d_m_e.html#autotoc_md18", null ],
+        [ "Backend Requirements", "md__r_e_a_d_m_e.html#autotoc_md19", null ]
+      ] ],
+      [ "Code Examples", "md__r_e_a_d_m_e.html#autotoc_md21", [
+        [ "Command ID Enum Entry", "md__r_e_a_d_m_e.html#autotoc_md22", null ],
+        [ "Command Table Entry", "md__r_e_a_d_m_e.html#autotoc_md24", null ],
+        [ "Flag Table Entry", "md__r_e_a_d_m_e.html#autotoc_md26", null ],
+        [ "Command Handler Example", "md__r_e_a_d_m_e.html#autotoc_md28", null ],
+        [ "Flag Handler Example", "md__r_e_a_d_m_e.html#autotoc_md30", null ]
+      ] ]
     ] ],
     [ "Classes", "annotated.html", [
       [ "Class List", "annotated.html", "annotated_dup" ],

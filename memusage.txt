@@ -2,10 +2,10 @@ AVR Memory Usage
 ----------------
 Device: atmega2560
 
-Program:    3684 bytes (1.4% Full)
+Program:    4012 bytes (1.5% Full)
 (.text + .data + .bootloader)
 
-Data:        918 bytes (11.2% Full)
+Data:        398 bytes (4.9% Full)
 (.data + .bss + .noinit)
 
 

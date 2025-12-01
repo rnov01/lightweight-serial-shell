@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tail_0',['tail',['../structringbuf.html#a0361f1bbe8f552b044c9d53e23c9388e',1,'ringbuf']]]
+  ['rodata_0',['RODATA',['../descriptions_8h.html#ad160240304f68937c01063dbb8b9706f',1,'descriptions.h']]]
 ];

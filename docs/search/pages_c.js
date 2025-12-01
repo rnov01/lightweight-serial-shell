@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['lightweight_20embedded_20serial_20shell_0',['Lightweight Embedded Serial Shell',['../index.html',1,'']]],
-  ['lookup_20tables_1',['2. Command / Flag Lookup Tables',['../index.html#autotoc_md10',1,'']]]
+  ['model_0',['Model',['../md__r_e_a_d_m_e.html#autotoc_md12',1,'Buffering Model'],['../md__r_e_a_d_m_e.html#autotoc_md18',1,'Typical Backend Model']]]
 ];

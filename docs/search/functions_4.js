@@ -7,5 +7,7 @@ var searchData=
   ['putc_4',['putc',['../class_u_s_a_r_t.html#a78e60929f49005766cf54763212be1c7',1,'USART::putc(char c)'],['../class_u_s_a_r_t.html#ac5c8a69b468cabb3a6f9d2bfa8a29744',1,'USART::putc(uint8_t c)']]],
   ['puts_5',['puts',['../classshell.html#a990dc0f952be1e10223694d5d0b232c2',1,'shell']]],
   ['puts_5fconst_6',['puts_const',['../classshell.html#a7be2bdd33c2361aa8ce54253a678601e',1,'shell']]],
-  ['puts_5fmany_7',['puts_many',['../classshell.html#a0ef2577e3593b6625c8727b10f33850b',1,'shell']]]
+  ['puts_5fmany_7',['puts_many',['../classshell.html#a0ef2577e3593b6625c8727b10f33850b',1,'shell']]],
+  ['puts_5fmany_5fro_8',['puts_many_ro',['../classshell.html#ae51648ce435333508f26fb974cfc7380',1,'shell']]],
+  ['puts_5fro_9',['puts_ro',['../classshell.html#aeca220393457b03aad7975298958411a',1,'shell']]]
 ];

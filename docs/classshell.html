@@ -116,6 +116,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a7be2bdd33c2361aa8ce54253a678601e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used to trasmit constant string (string literal)  <br /></td></tr>
 <tr class="memitem:a0ef2577e3593b6625c8727b10f33850b" id="r_a0ef2577e3593b6625c8727b10f33850b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0ef2577e3593b6625c8727b10f33850b">puts_many</a> (const char *first,...)</td></tr>
 <tr class="memdesc:a0ef2577e3593b6625c8727b10f33850b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Print multiple concatenated strings separated by commmas.  <br /></td></tr>
+<tr class="memitem:aeca220393457b03aad7975298958411a" id="r_aeca220393457b03aad7975298958411a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeca220393457b03aad7975298958411a">puts_ro</a> (const char *p)</td></tr>
+<tr class="memitem:ae51648ce435333508f26fb974cfc7380" id="r_ae51648ce435333508f26fb974cfc7380"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae51648ce435333508f26fb974cfc7380">puts_many_ro</a> (const char *first,...)</td></tr>
 <tr id="pub-methods-0" class="groupHeader"><td colspan="2"><div class="groupHeader">Legacy functions</div></td></tr>
 <tr><td colspan="2" class="ititle"><div class="groupText"><p>Non-blocking/blocking char input </p>
 </div></td></tr>
@@ -279,9 +281,47 @@ The shell is designed to be lightweight, non-blocking, and easily adapted to dif
 <p>This function accepts a variable-length list of string arguments. Strings are transmitted sequentially until a final nullptr arguments is encountered Usage as follows: <br  />
 </p><div class="fragment"><div class="line"> *<span class="keywordtype">char</span> name[] = {name};</div>
 <div class="line"><a class="code hl_function" href="#a0ef2577e3593b6625c8727b10f33850b">puts_many</a>(<span class="stringliteral">&quot;Hello&quot;</span>, name, <span class="stringliteral">&quot;how are you today?&quot;</span>); </div>
-<div class="ttc" id="aclassshell_html_a0ef2577e3593b6625c8727b10f33850b"><div class="ttname"><a href="#a0ef2577e3593b6625c8727b10f33850b">shell::puts_many</a></div><div class="ttdeci">void puts_many(const char *first,...)</div><div class="ttdoc">Print multiple concatenated strings separated by commmas.</div><div class="ttdef"><b>Definition</b> shell.cpp:72</div></div>
+<div class="ttc" id="aclassshell_html_a0ef2577e3593b6625c8727b10f33850b"><div class="ttname"><a href="#a0ef2577e3593b6625c8727b10f33850b">shell::puts_many</a></div><div class="ttdeci">void puts_many(const char *first,...)</div><div class="ttdoc">Print multiple concatenated strings separated by commmas.</div><div class="ttdef"><b>Definition</b> shell.cpp:73</div></div>
 </div><!-- fragment --> <dl class="section warning"><dt>Warning</dt><dd>The last string argument passed MUST be nullptr. <br  />
  consider a macro to automatically append a nullptr string to the function arguments for safety </dd></dl>
+
+</div>
+</div>
+<a id="ae51648ce435333508f26fb974cfc7380" name="ae51648ce435333508f26fb974cfc7380"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae51648ce435333508f26fb974cfc7380">&#9670;&#160;</a></span>puts_many_ro()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void shell::puts_many_ro </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>first</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>...</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="aeca220393457b03aad7975298958411a" name="aeca220393457b03aad7975298958411a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeca220393457b03aad7975298958411a">&#9670;&#160;</a></span>puts_ro()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void shell::puts_ro </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>p</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

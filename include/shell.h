@@ -6,6 +6,7 @@
 /*! \brief Maximum number of arguments that can be parsed from a command line. 
  *  \note Multiple flags on a single command not currently supported. */
 #define MAX_ARGS 8
+#define MAX_FLAGS 8
 
 /*! \enum command_id_t
  *  \brief Enumerated list of system commands.
@@ -52,6 +53,7 @@ struct flag_t {
     const char* name;
     const char* description;
     flag_handler exe;
+    const char* parent;
 };
 
 /*! /struct command_t 
@@ -67,8 +69,16 @@ struct command_t {      //order identical as enum for easy lookup
     const char* description;
     cmd_handler exe;
     command_id_t id;
-    const flag_t* flags;
+    const flag_t* flags[MAX_FLAGS]; //max 8 flags/cmd
+    uint8_t flag_count;
 };
+
+/*! \name User-defined command grabbers
+ * @{
+ */
+extern const command_t __start_shell_cmds[];
+extern const command_t __stop_shell_cmds[];
+///@}
 
 /*! \name f_lut Flag lookup table declarations 
  *  \brief One table is defined for each command that supports flags. For commands without flags, the
@@ -93,6 +103,9 @@ public:
     /*! \fn shell(USART* interface)
      * \brief Construct a shell object using the specified serial interface. */
     shell(USART* interface);
+    /*!
+    */
+    void init( const command_t* user_cmds = nullptr, const flag_t* user_flags = nullptr );
     /*! \fn tick()
      *  \brief Placeholder periodic update hook
      *  \note Currently unused */
@@ -140,6 +153,13 @@ private:
     char *_argv[MAX_ARGS];
     int _argc = 0;
 
+    void build_cmd_table(const command_t* table);   //combines built-in lut with any user defined commands
+    void build_flag_links(const flag_t* table);
+    void attach_flag_to_command(command_t* cmd, const flag_t* flag);
+    static const int MAX_CMD = 50;
+    const command_t* final_cmd[MAX_CMD];
+    int final_count = 0;
+
     //command handler functions
     void cmd_help(int argc, char **argv);
     void cmd_debug(int argc, char **argv);
@@ -166,3 +186,14 @@ private:
         const char* const _ro_list_[] = { __VA_ARGS__, nullptr }; \
         puts_many_ro_i(sh, _ro_list_); \
     } while(0)
+
+#define SHELL_CMD(name, desc, handler, flags)   \
+    const command_t __shell_cmd_##handler       \
+    __attribute__((section(".shell_cmds"))) = { \
+        ROSTR(name),                            \
+        ROSTR(desc),                            \
+        handler,                                \
+        NONE,                                   \
+        flags,                                  \
+        nullptr                                 \
+    };

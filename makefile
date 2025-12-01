@@ -38,7 +38,7 @@ AVRDUDE    = avrdude
 
 CXXFLAGS   = -std=c++17 -Os -Wall -mmcu=$(MCU) -DF_CPU=$(F_CPU) -I$(INC_DIR)
 CFLAGS     = -Os -Wall -mmcu=$(MCU) -DF_CPU=$(F_CPU) -I$(INC_DIR)
-LDFLAGS    = -mmcu=$(MCU) -Wl,--print-memory-usage
+LDFLAGS    = -mmcu=$(MCU) -Wl,--print-memory-usage 
 
 # ============================================================
 # Build Targets
