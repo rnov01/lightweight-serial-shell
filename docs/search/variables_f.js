@@ -1,7 +1,5 @@
 var searchData=
 [
-  ['usart0_0',['USART0',['../usart_8h.html#a1e8274d22b4cdbe9c56cdb3a4b6ccd87',1,'usart.h']]],
-  ['usart3_1',['USART3',['../usart_8h.html#ac0c369c54730461b632f7fe9e0a54d99',1,'usart.h']]],
-  ['usr_5fcmds_2',['usr_cmds',['../user__commands_8h.html#aa5f22c5a50b85e900233fd631de96440',1,'user_commands.h']]],
-  ['usr_5fflags_3',['usr_flags',['../user__commands_8h.html#a0e9e6b558d5d983d36211edc479b1c0a',1,'user_commands.h']]]
+  ['tail_0',['tail',['../structringbuf.html#a0361f1bbe8f552b044c9d53e23c9388e',1,'ringbuf']]],
+  ['type_1',['type',['../structcommand__def__t.html#a23d3b5f9be9dfa5822b25e28f915ded6',1,'command_def_t::type'],['../structcommand__rt__t.html#aa86a3babbda554358db2f7935d8268e0',1,'command_rt_t::type'],['../struct__err.html#a7321eeb8dbe54a3e41442f3357ce9b9c',1,'_err::type']]]
 ];

@@ -26,6 +26,9 @@ var usart_8h =
       [ "en", "usart_8h.html#ac1b73c245c833d920edd62ecf5ee5be9a9cfefed8fb9497baa5cd519d7d2bb5d7", null ]
     ] ],
     [ "clear_buffer", "usart_8h.html#a422c62f976713b855b73f0d4ec681601", null ],
+    [ "putc_wrapper", "usart_8h.html#a3052181c9feb2d9ebf1cf5b34d651b46", null ],
+    [ "puts_wrapper", "usart_8h.html#aedd858a683e1afaa8b0984f000929e58", null ],
+    [ "putsP_wrapper", "usart_8h.html#a12661432d36ef5570f94ced26519f276", null ],
     [ "USART0", "usart_8h.html#a1e8274d22b4cdbe9c56cdb3a4b6ccd87", null ],
     [ "USART3", "usart_8h.html#ac0c369c54730461b632f7fe9e0a54d99", null ]
 ];

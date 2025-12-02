@@ -69,7 +69,15 @@ int run_usart_test() {
     USART USART0(PIN_E1, PIN_E0, _SFR_MEM_ADDR(UCSR0A), _SFR_MEM_ADDR(UCSR0B), _SFR_MEM_ADDR(UBRR0), _SFR_MEM_ADDR(UDR0));
     USART0.init(19200, rx_int_mode::en, tx_int_mode::dis, 
         data_int_mode::dis, rx_mode::en, tx_mode::en, spd_mode::norm);
-    shell sh(&USART0);  //init shell
+
+    shell_io_t io = {
+        .putc = putc_wrapper,
+        .puts = puts_wrapper,
+        .puts_p = putsP_wrapper,
+        .self = &USART0
+    };
+
+    shell sh(&io);  //init shell
 
     sei();
 

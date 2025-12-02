@@ -8,6 +8,7 @@ var annotated_dup =
     [ "flag_t", "structflag__t.html", "structflag__t" ],
     [ "pin", "structpin.html", "structpin" ],
     [ "ringbuf", "structringbuf.html", "structringbuf" ],
+    [ "serial_io_s", "structserial__io__s.html", "structserial__io__s" ],
     [ "shell", "classshell.html", "classshell" ],
     [ "str_to_cmd", "structstr__to__cmd.html", "structstr__to__cmd" ],
     [ "USART", "class_u_s_a_r_t.html", "class_u_s_a_r_t" ]

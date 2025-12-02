@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['set_5finput_0',['set_input',['../pin_8h.html#a41208ab31cbaeef939a7772e961be9af',1,'pin.h']]],
-  ['set_5foutput_1',['set_output',['../pin_8h.html#a89edd763952c9c50411dda1e88b874ee',1,'pin.h']]],
-  ['shell_5fcmd_2',['SHELL_CMD',['../shell_8h.html#a2d2c751bb93f5e59ed135f5a3b415676',1,'shell.h']]]
+  ['pin_5flist_0',['PIN_LIST',['../pin_8h.html#a8ffa9f48491717283ff496fc661830dc',1,'pin.h']]],
+  ['println_1',['PRINTLN',['../shell_8h.html#a746390d1748a9831216d7c77723380bb',1,'shell.h']]],
+  ['putlnp_2',['PUTLNP',['../shell_8h.html#a405445cba8e05734137ddfcb76755871',1,'shell.h']]],
+  ['putp_3',['PUTP',['../shell_8h.html#af8b31cb85c19b3cdc3cc21aac43243c3',1,'shell.h']]],
+  ['puts_5fmany_5f_4',['puts_many_',['../shell_8h.html#a3ae3d01650e7ff2af029726cdcbb3ebe',1,'shell.h']]]
 ];

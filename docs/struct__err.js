@@ -1,5 +1,5 @@
 var struct__err =
 [
-    [ "err_id", "struct__err.html#a99fed00af9066d734e7d828c0949e55d", null ],
-    [ "message", "struct__err.html#ac992e857fb13c42b760517209bf5ee80", null ]
+    [ "description", "struct__err.html#a867f1ebf29034b95a2e8691e91bcab8c", null ],
+    [ "type", "struct__err.html#a7321eeb8dbe54a3e41442f3357ce9b9c", null ]
 ];
