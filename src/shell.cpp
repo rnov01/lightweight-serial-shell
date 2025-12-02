@@ -5,6 +5,7 @@
 #include "../include/colors.h"
 #include <string.h>
 #include <util/delay.h>
+#include <stdlib.h>
 
 ringbuf GLOBAL_BUFFER = {{0}, 0, 0};
 
@@ -129,7 +130,7 @@ void shell::printc(color_t color, const char* s) {
 
 void shell::execute(const command_rt_t* cmd, int argc, char** argv) {
     if(!cmd) return;
-    const flag_t* parsed_flags[MAX_FLAGS];
+    parsed_flag_t parsed_flags[MAX_FLAGS];
     uint8_t parsed_flags_count = 0;
 
     for (int i=1; i<argc; i++) {
@@ -142,11 +143,27 @@ void shell::execute(const command_rt_t* cmd, int argc, char** argv) {
                 error(err_t::UNKNOWN_FLAG, arg);
                 return;
             }
+
+            parsed_flag_t pf;
+            pf.flag = flag;
+            pf.param = nullptr;
+
+            if (flag->param_mode != FNO_PARAM) {
+                if (i+1 >= argc) {
+                    if (flag->param_mode == FREQ_PARAM) {
+                        error(err_t::MISSING_ARG, flag->name);
+                        return;
+                    }
+                }else {
+                    pf.param = argv[++i];
+                }
+            }
             if (parsed_flags_count >= MAX_FLAGS) {
                 error(err_t::RUNTIME_FAILURE, "Too many flags");
                 return;
             }
-            parsed_flags[parsed_flags_count++] = flag;
+            parsed_flags[parsed_flags_count++] = pf;
+           
         } else {}
         
     }
@@ -210,19 +227,21 @@ bool shell::has_flag(int argc, char **argv, const char* flag) {
     return false;
 }
 
-void shell::dispatch_flag(const command_rt_t* parent, const flag_t* flag, int argc, char** argv) {
+void shell::dispatch_flag(const command_rt_t* parent, const parsed_flag_t& pf, int argc, char** argv) {
+    const flag_t* flag = pf.flag;
+    const char* param = pf.param;
     if(flag->type == MEMBER_H) {
         if (!flag->exe.mem) {
             error(err_t::RUNTIME_FAILURE, flag->name);
             return;
         }
-        (this->*(flag->exe.mem))(parent, argc, argv);
+        (this->*(flag->exe.mem))(parent, param, argc, argv);
     } else{
         if (!flag->exe.free) {
             error(err_t::RUNTIME_FAILURE, flag->name);
             return;
         }
-        (flag->exe.free)(parent, argc, argv);
+        (flag->exe.free)(parent, param, argc, argv);
     } 
 }
 
@@ -239,7 +258,7 @@ const char* shell::get_opt(int argc, char** argv, const char* opt) {
 void shell::error(err_t err, const char* detail) {
     puts_ro(CRED);
     puts_ro(ROSTR("Error >> "));
-    puts((const char*)err_msg[(int)err].description);
+    puts(err_msg[(int)err].description);
     if(detail) {
         puts_ro(ROSTR(" : "));
         puts(detail);
@@ -351,6 +370,7 @@ const flag_t* const* shell::get_cmd_flags(const char* parent) {
     return cmd->flags;
 }
 
+
 //#####################################################################
 // #                                                                  #
 // #                      Handler Functions                           #  
@@ -359,7 +379,7 @@ const flag_t* const* shell::get_cmd_flags(const char* parent) {
 
 
 //help flags
-void shell::f_help_long(const command_rt_t* parent, int argc, char **argv) {
+void shell::f_help_long(const command_rt_t* parent, const char* param, int argc, char **argv) {
     puts_ro(ROSTR("\r\nFull command descriptions:\r\n"));
     for(int i=0; i < final_count; i++) {
         if (final_cmd[i].def->in_progmem) {
@@ -372,19 +392,18 @@ void shell::f_help_long(const command_rt_t* parent, int argc, char **argv) {
             puts(final_cmd[i].def->description);
             LINE
         }
-         
     }
     puts_ro(ROSTR("\r\nUse -c <command> to list flags for a specific command\r\n"));
 }
 
-void shell::f_help_c(const command_rt_t* parent, int argc, char **argv) {
-    if (argc < 3) {
+void shell::f_help_c(const command_rt_t* parent, const char* param, int argc, char **argv) {
+    if (!param) {
         error(err_t::MISSING_ARG, "Usage: help -c <command>\r\n");
         return;
     }
-    const char* target = argv[2];
+
     for(int a=0; a<final_count; a++) {
-        if (strcmp(target, final_cmd[a].def->name) == 0) {
+        if (strcmp(param, final_cmd[a].def->name) == 0) {
             puts_ro(ROSTR("\r\nFlags available for command: ")); 
             printc(NAMECOLOR(a), final_cmd[a].def->name);
             LINE LINE
@@ -406,7 +425,7 @@ void shell::f_help_c(const command_rt_t* parent, int argc, char **argv) {
             return;
         }
     }
-    error(err_t::INVALID_CMD, target);
+    error(err_t::INVALID_PARAM, param);
 }
 
 void shell::cmd_help(const command_rt_t* self, int argc, char **argv) {
@@ -429,8 +448,15 @@ void shell::cmd_print(const command_rt_t* self, int argc, char **argv) {
 
 }
 
-void shell::f_led_blink(const command_rt_t* parent, int argc, char **argv) {
-    for(int i=0; i < 20; i++) {
+void shell::f_led_blink(const command_rt_t* parent, const char* param, int argc, char **argv) {
+    int n = atoi(param);
+    if (n > 20) {
+        error(err_t::INVALID_PARAM, "Must be and integer less than 20.");
+        return;
+    }
+    puts_ro(ROSTR("LED blinking..."));
+    low(PIN_B7);
+    for(int i=0; i < (2*n); i++) {
         toggle(PIN_B7);
         _delay_ms(500);
     }

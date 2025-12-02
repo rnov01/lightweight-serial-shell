@@ -25,10 +25,10 @@ typedef void (shell::*cmd_handler)(const command_rt_t* self, int argc, char **ar
     are called <i>only</i> from within their respective cmd_* command handler.
  *  \param argc Number of parsed arguments 
  *  \param argv Array of pointers to parsed argument strings */
-typedef void (shell::*flag_handler)(const command_rt_t* parent, int argc, char **argv);
+typedef void (shell::*flag_handler)(const command_rt_t* parent, const char* param, int argc, char **argv);
 
 typedef void(*cmd_handler_free)(const command_rt_t* self, int argc, char **argv);
-typedef void(*flag_handler_free)(const command_rt_t* parent, int argc, char **argv);
+typedef void(*flag_handler_free)(const command_rt_t* parent, const char* param, int argc, char **argv);
 
 typedef struct serial_io_s {
     void (*putc)(char c, void* self);
@@ -74,6 +74,13 @@ struct flag_t {
     flag_handler_u exe;
     const char* parent;
     bool in_progmem;
+    flag_param_t param_mode;
+};
+
+//struct to store parsed flags and their parameters
+struct parsed_flag_t {
+    const flag_t* flag;
+    const char* param;
 };
 
 /*! /struct command_t 
@@ -110,7 +117,8 @@ enum class err_t {
    INVALID_CMD,
    UNKNOWN_FLAG,
    MISSING_ARG,
-   RUNTIME_FAILURE
+   RUNTIME_FAILURE,
+   INVALID_PARAM
 };
 typedef struct _err {
     err_t type; 
@@ -168,7 +176,7 @@ public:
     void dispatch_handler(const command_rt_t* cmd, int argc, char** argv);
     const flag_t* find_flag(const command_rt_t* cmd, const char* n);
     bool has_flag(int argc, char **argv, const char* f);    //check if user input has flag argument
-    void dispatch_flag(const command_rt_t* parent, const flag_t* flag, int argc, char** argv);
+    void dispatch_flag(const command_rt_t* parent, const parsed_flag_t& pf, int argc, char** argv);
     const char* get_opt(int argc, char** argv, const char* opt);    //returns cmd or flag parameter
 
 
@@ -210,9 +218,9 @@ private:
     void cmd_led(const command_rt_t* self, int argc, char **argv);
     //flag handler functions
     //help flags
-    void f_help_long(const command_rt_t* parent, int argc, char **argv);
-    void f_help_c(const command_rt_t* parent, int argc, char **argv);
-    void f_led_blink(const command_rt_t* parent, int argc, char **argv);
+    void f_help_long(const command_rt_t* parent, const char* param, int argc, char **argv);
+    void f_help_c(const command_rt_t* parent, const char* param, int argc, char **argv);
+    void f_led_blink(const command_rt_t* parent, const char* param, int argc, char **argv);
 
     command_rt_t* parse_command(char *buffer);
     int tokenizer(char *buf, char **argv, int max_args);
@@ -250,6 +258,14 @@ private:
 #define FLAGCOLOR GREEN
 #define PUTLNP(s) puts_many_ro(s, ROSTR("\r\n"), nullptr)
 
+//user table macro helpers
 
+#define CMD(name, description, handler, mode) \
+    {name, description, FREE_H, {.free = handler}, mode, false}
+#define CMD_END {nullptr, nullptr, FREE_H, {.free = nullptr}, FLAG_ONLY, false}
+
+#define FLAG(parent, flagname, description, handler, param_mode) \
+    {flagname, description, FREE_H, {.free = handler}, parent, false, param_mode}
+#define FLAG_END {nullptr, nullptr, FREE_H, {.free = nullptr}, nullptr, false, FNO_PARAM}
 
 #define SH_USR_CMD(name) name(const command_rt_t* self, int argc, char** argv)
