@@ -1,6 +1,7 @@
 #pragma once
 
 #include "usart.h"
+#include "colors.h"
 #include <stdarg.h>
 
 /*! \brief Maximum number of arguments that can be parsed from a command line. 
@@ -8,30 +9,10 @@
 #define MAX_ARGS 8
 #define MAX_FLAGS 8
 
-/*! \enum command_id_t
- *  \brief Enumerated list of system commands.
- *  \details Each command string parsed from user input is converted into one of these IDs. The mapping is 
- *  performed by comparing user input against the command lookup table (\ref shell::cmd[]).
- *  \note The order of this enum must match the order of the entries in \ref shell::cmd[] to ensure 
- *  correct indexing */
-typedef enum {
-    HELP, DEBUG, PRINT, LED, NONE, err, NUM_CMDS
-}command_id_t;
-
-/* \brief Legacy structure from previous simplified command table 
- *  \note Currently unused. Retained only for reference. */
-struct str_to_cmd {
-    const char* name;
-    command_id_t cmd; 
-};
-struct _err {
-    int err_id;
-    const char* message;
-};
-
 // Forward declaration of shell class and runtime command struct
 class shell;
 struct command_rt_t;
+
 
 /*! \brief Function pointer type for command handlers (cmd_* functions). 
  *  \details Command handlers execute the main command functionality and are responsible for invoking any 
@@ -49,13 +30,33 @@ typedef void (shell::*flag_handler)(const command_rt_t* parent, int argc, char *
 typedef void(*cmd_handler_free)(const command_rt_t* self, int argc, char **argv);
 typedef void(*flag_handler_free)(const command_rt_t* parent, int argc, char **argv);
 
+typedef struct serial_io_s {
+    void (*putc)(char c, void* self);
+    void (*puts)(const char* s, void* self);
+    void (*puts_p)(const char* p, void* self);
+    void* self;
+}shell_io_t;
+
 union cmd_handler_u{
         cmd_handler mem;
         cmd_handler_free free;
     };
 
+union flag_handler_u {
+    flag_handler mem;
+    flag_handler_free free;
+};
+
 enum handler_type_t {       //member handler function for system commands, free handler functions for user cmds
     MEMBER_H, FREE_H
+};
+
+enum flag_mode_t {
+    BASE_THEN_FLAGS, FLAG_ONLY, BASE_ONLY_NO_FLAGS
+};
+
+enum flag_param_t {
+    FNO_PARAM, FREQ_PARAM, FOPT_PARAM
 };
 
 /*! \struct flag_t 
@@ -69,7 +70,8 @@ enum handler_type_t {       //member handler function for system commands, free 
 struct flag_t {
     const char* name;
     const char* description;
-    flag_handler exe;
+    handler_type_t type;
+    flag_handler_u exe;
     const char* parent;
     bool in_progmem;
 };
@@ -87,6 +89,7 @@ struct command_def_t {      //order identical as enum for easy lookup
     const char* description;
     handler_type_t type;
     cmd_handler_u exe;
+    flag_mode_t flag_mode;
     bool in_progmem;
 };
 
@@ -95,26 +98,25 @@ struct command_rt_t {
         const command_def_t* def;   //immutable definition
         handler_type_t type;
         cmd_handler_u exe;
+        flag_mode_t flag_mode;
         const flag_t* flags[MAX_FLAGS]; 
         uint8_t flag_count;
         int id;
         bool is_user;
 };
 
+enum class err_t {
+   NONE,
+   INVALID_CMD,
+   UNKNOWN_FLAG,
+   MISSING_ARG,
+   RUNTIME_FAILURE
+};
+typedef struct _err {
+    err_t type; 
+    const char* description;
+};
 
-
-
-
-/*! \name f_lut Flag lookup table declarations 
- *  \brief One table is defined for each command that supports flags. For commands without flags, the
- *  associated pointer in \ref shell::cmd[] should be set to nullptr. 
- * @{
- */
-extern const flag_t help_flags[];
-extern const flag_t debug_flags[];
-extern const flag_t print_flags[];
-extern const flag_t led_flags[];
-///@}
 
 /*! \class shell 
  *  \brief Driver class for the serial shell interface. 
@@ -127,7 +129,7 @@ class shell {
 public:
     /*! \fn shell(USART* interface)
      * \brief Construct a shell object using the specified serial interface. */
-    shell(USART* interface);
+    shell(shell_io_t* interface);
     /*!
     */
     void init(const command_def_t* user_cmds = nullptr, const flag_t* user_flags = nullptr);
@@ -144,11 +146,7 @@ public:
     /*! \fn puts(char* s) 
      *  \brief Used to transmit a mutable string
       * \param s A string (pointer to char array)*/
-    void puts(char* s);
-    /*! \fn puts_const(const char* s)
-     *  \brief Used to trasmit constant string (string literal)
-     *  \param s A const string (const pointer to char array)*/
-    void puts_const(const char* s);
+    void puts(const char* s);
     /*! \fn puts_many(const char* first, ...)
      *  \brief Print multiple concatenated strings separated by commmas 
      *  \details This function accepts a variable-length list of string arguments. Strings are transmitted sequentially
@@ -163,19 +161,18 @@ public:
     void puts_many_ro(const char* first, ...);
 
     //color coded puts for special identifiers
-    void puts_name(command_rt_t* cmd);
-    void puts_err(const char* err);
-    void puts_flag(const char* name);
-
+    void printc(color_t color, const char* s);         //color string
+  
     //user helper funcs
     void execute(const command_rt_t* cmd, int argc, char** argv);
+    void dispatch_handler(const command_rt_t* cmd, int argc, char** argv);
     const flag_t* find_flag(const command_rt_t* cmd, const char* n);
     bool has_flag(int argc, char **argv, const char* f);    //check if user input has flag argument
     void dispatch_flag(const command_rt_t* parent, const flag_t* flag, int argc, char** argv);
     const char* get_opt(int argc, char** argv, const char* opt);    //returns cmd or flag parameter
 
 
-    void error(const char* msg);
+    void error(err_t err, const char* msg);
 
     /*! \name Legacy functions
      *  \brief Non-blocking/blocking char input
@@ -184,7 +181,7 @@ public:
     char bget();    //blocking
     ///@}
 private:
-     USART* _interface;
+    shell_io_t* io;
 
     char cmd_buffer[64];
     char sh_line[64];
@@ -201,7 +198,7 @@ private:
     command_rt_t final_cmd[MAX_CMD];
     int final_count = 0;
 
-    const _err* err_msg[];
+    static const _err err_msg[];
 
     //get functions
     command_rt_t* get_cmd(const char* name);
@@ -220,7 +217,7 @@ private:
     command_rt_t* parse_command(char *buffer);
     int tokenizer(char *buf, char **argv, int max_args);
    
-    static const command_def_t cmd[NUM_CMDS+1];
+    static const command_def_t cmd[];
     //struct command_runtime_t 
     static const flag_t help_flags[];
     static const flag_t debug_flags[];
@@ -246,8 +243,13 @@ private:
         nullptr                                 \
     };
 
-#define PUT(s) puts_const(s)
-#define PUTLN(s) puts_many(s, "\r\n", nullptr)
-#define PUTP(s) puts_ro(s)
+#define PRINTLN(s) do {this->puts(s); this->puts("\r\n");} while(0)
+#define LINE this->puts_ro(ROSTR("\r\n"));
+#define PUTP(s) this->puts_ro(ROSTR(s));
+#define NAMECOLOR(s) (final_cmd[s].is_user ? YELLOW : CYAN)
+#define FLAGCOLOR GREEN
 #define PUTLNP(s) puts_many_ro(s, ROSTR("\r\n"), nullptr)
+
+
+
 #define SH_USR_CMD(name) name(const command_rt_t* self, int argc, char** argv)

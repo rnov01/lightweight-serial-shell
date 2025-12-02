@@ -110,7 +110,7 @@ class USART {
          *  \note Buffer will be automatically flushed after it is transmitted
          *  \param str Array-stored string
          */
-        void put_string(char* str);
+        void put_string(const char* str);
 
         /*! \fn void put_stringP(PGM_P str)
          *  \brief Transmits a string literal 
@@ -134,3 +134,7 @@ class USART {
 inline void clear_buffer(char* str) { while(*str) {*str++ = '\0';}}
 extern USART USART0;
 extern USART USART3;
+
+void putc_wrapper(char c, void* self);
+void puts_wrapper(const char* c, void* self);
+void putsP_wrapper(const char* c, void* self);

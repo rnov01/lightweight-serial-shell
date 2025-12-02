@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['member_5fh_0',['MEMBER_H',['../shell_8h.html#aa8d2e1b59084ad8904d1a0e6d43d1a53a90f7c8492eafc306a58d467e459bb4f4',1,'shell.h']]]
+  ['help_0',['HELP',['../commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824',1,'commands.h']]]
 ];

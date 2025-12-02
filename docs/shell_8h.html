@@ -99,20 +99,21 @@ $(function(){initNavTree('shell_8h.html','',''); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="usart_8h_source.html">usart.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="colors_8h_source.html">colors.h</a>&quot;</code><br />
 <code>#include &lt;stdarg.h&gt;</code><br />
 </div>
 <p><a href="shell_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:str_5Fto_5Fcmd" id="r_str_5Fto_5Fcmd"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structstr__to__cmd.html">str_to_cmd</a></td></tr>
-<tr class="memitem:_5Ferr" id="r__5Ferr"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__err.html">_err</a></td></tr>
+<tr class="memitem:serial_5Fio_5Fs" id="r_serial_5Fio_5Fs"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structserial__io__s.html">serial_io_s</a></td></tr>
 <tr class="memitem:cmd_5Fhandler_5Fu" id="r_cmd_5Fhandler_5Fu"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="unioncmd__handler__u.html">cmd_handler_u</a></td></tr>
 <tr class="memitem:flag_5Ft" id="r_flag_5Ft"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structflag__t.html">flag_t</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Describes a single flag (subcommand) associated with a primary command.  <a href="structflag__t.html#details">More...</a><br /></td></tr>
 <tr class="memitem:command_5Fdef_5Ft" id="r_command_5Fdef_5Ft"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcommand__def__t.html">command_def_t</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Struct defining the lookup table entry for each system command.  <a href="structcommand__def__t.html#details">More...</a><br /></td></tr>
 <tr class="memitem:command_5Frt_5Ft" id="r_command_5Frt_5Ft"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structcommand__rt__t.html">command_rt_t</a></td></tr>
+<tr class="memitem:_5Ferr" id="r__5Ferr"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct__err.html">_err</a></td></tr>
 <tr class="memitem:shell" id="r_shell"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classshell.html">shell</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Driver class for the serial shell interface.  <a href="classshell.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
@@ -123,48 +124,68 @@ Macros</h2></td></tr>
 <tr class="memitem:aea77c3647896556fe9a577bab0092c12" id="r_aea77c3647896556fe9a577bab0092c12"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aea77c3647896556fe9a577bab0092c12">MAX_FLAGS</a>&#160;&#160;&#160;8</td></tr>
 <tr class="memitem:a3ae3d01650e7ff2af029726cdcbb3ebe" id="r_a3ae3d01650e7ff2af029726cdcbb3ebe"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ae3d01650e7ff2af029726cdcbb3ebe">puts_many_</a>(sh, ...)</td></tr>
 <tr class="memitem:a2d2c751bb93f5e59ed135f5a3b415676" id="r_a2d2c751bb93f5e59ed135f5a3b415676"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2d2c751bb93f5e59ed135f5a3b415676">SHELL_CMD</a>(name,  desc,  handler,  flags)</td></tr>
-<tr class="memitem:a62ef7a7d14f1ce188f05591dac976f9a" id="r_a62ef7a7d14f1ce188f05591dac976f9a"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a62ef7a7d14f1ce188f05591dac976f9a">PUT</a>(s)</td></tr>
-<tr class="memitem:a4ee6e1bee73b45f4f6b7b86ef29a1e88" id="r_a4ee6e1bee73b45f4f6b7b86ef29a1e88"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4ee6e1bee73b45f4f6b7b86ef29a1e88">PUTLN</a>(s)</td></tr>
+<tr class="memitem:a746390d1748a9831216d7c77723380bb" id="r_a746390d1748a9831216d7c77723380bb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a746390d1748a9831216d7c77723380bb">PRINTLN</a>(s)</td></tr>
+<tr class="memitem:af94cfb03461685fead1fe045d5c96f01" id="r_af94cfb03461685fead1fe045d5c96f01"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af94cfb03461685fead1fe045d5c96f01">LINE</a>&#160;&#160;&#160;this-&gt;puts_ro(<a class="el" href="ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c">ROSTR</a>(&quot;\r\n&quot;));</td></tr>
 <tr class="memitem:af8b31cb85c19b3cdc3cc21aac43243c3" id="r_af8b31cb85c19b3cdc3cc21aac43243c3"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8b31cb85c19b3cdc3cc21aac43243c3">PUTP</a>(s)</td></tr>
+<tr class="memitem:a71b54d0b460b084ebde26485a06b1adf" id="r_a71b54d0b460b084ebde26485a06b1adf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a71b54d0b460b084ebde26485a06b1adf">NAMECOLOR</a>(s)</td></tr>
+<tr class="memitem:a909c5ea10848001eea5ca727141144c4" id="r_a909c5ea10848001eea5ca727141144c4"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a909c5ea10848001eea5ca727141144c4">FLAGCOLOR</a>&#160;&#160;&#160;<a class="el" href="colors_8h.html#a0a8ef1b5e1941b7257e545cc33405ff1aa60bd322f93178d68184e30e162571ca">GREEN</a></td></tr>
+<tr class="memitem:a405445cba8e05734137ddfcb76755871" id="r_a405445cba8e05734137ddfcb76755871"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a405445cba8e05734137ddfcb76755871">PUTLNP</a>(s)</td></tr>
+<tr class="memitem:abc1d2f50899625122824b1a3f1ae1eab" id="r_abc1d2f50899625122824b1a3f1ae1eab"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abc1d2f50899625122824b1a3f1ae1eab">SH_USR_CMD</a>(name)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-typedef-members" class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:af9667052b09a5914820878e5cbebec96" id="r_af9667052b09a5914820878e5cbebec96"><td class="memItemLeft" align="right" valign="top">typedef void(shell::*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af9667052b09a5914820878e5cbebec96">cmd_handler</a>) (int argc, char **argv)</td></tr>
-<tr class="memdesc:af9667052b09a5914820878e5cbebec96"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function pointer type for command handlers (cmd_* functions).  <br /></td></tr>
-<tr class="memitem:af8f793ca6bf0b0179e3f722476f74504" id="r_af8f793ca6bf0b0179e3f722476f74504"><td class="memItemLeft" align="right" valign="top">typedef void(shell::*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af8f793ca6bf0b0179e3f722476f74504">flag_handler</a>) (int argc, char **argv)</td></tr>
-<tr class="memdesc:af8f793ca6bf0b0179e3f722476f74504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function pointer type for flag handlers (f_* functions)  <br /></td></tr>
-<tr class="memitem:ac8e61212a9d2352594e6fe165ddaf37f" id="r_ac8e61212a9d2352594e6fe165ddaf37f"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac8e61212a9d2352594e6fe165ddaf37f">cmd_handler_free</a>) (int argc, char **argv)</td></tr>
-<tr class="memitem:a5a0e034a703e2354f3c6504e6cdf3856" id="r_a5a0e034a703e2354f3c6504e6cdf3856"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a0e034a703e2354f3c6504e6cdf3856">flag_handler_free</a>) (int argc, char **argv)</td></tr>
+<tr class="memitem:acd42fda7a3240290200629ab5ec2cbd6" id="r_acd42fda7a3240290200629ab5ec2cbd6"><td class="memItemLeft" align="right" valign="top">typedef void(shell::*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd42fda7a3240290200629ab5ec2cbd6">cmd_handler</a>) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *self, int argc, char **argv)</td></tr>
+<tr class="memdesc:acd42fda7a3240290200629ab5ec2cbd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function pointer type for command handlers (cmd_* functions).  <br /></td></tr>
+<tr class="memitem:a07261cc2aeb770b60d14de2cdb3b177b" id="r_a07261cc2aeb770b60d14de2cdb3b177b"><td class="memItemLeft" align="right" valign="top">typedef void(shell::*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a07261cc2aeb770b60d14de2cdb3b177b">flag_handler</a>) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *parent, int argc, char **argv)</td></tr>
+<tr class="memdesc:a07261cc2aeb770b60d14de2cdb3b177b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function pointer type for flag handlers (f_* functions)  <br /></td></tr>
+<tr class="memitem:a095fb78859ff5c3f130ff24872fec195" id="r_a095fb78859ff5c3f130ff24872fec195"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a095fb78859ff5c3f130ff24872fec195">cmd_handler_free</a>) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *self, int argc, char **argv)</td></tr>
+<tr class="memitem:a02be4e16475e157200e86e1f2ce78445" id="r_a02be4e16475e157200e86e1f2ce78445"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a02be4e16475e157200e86e1f2ce78445">flag_handler_free</a>) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *parent, int argc, char **argv)</td></tr>
+<tr class="memitem:a522608051ebe81a0edec1c14b64f6b32" id="r_a522608051ebe81a0edec1c14b64f6b32"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structserial__io__s.html">serial_io_s</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a522608051ebe81a0edec1c14b64f6b32">shell_io_t</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ab73a326523c6a0ec9bb287cf70c33ca2" id="r_ab73a326523c6a0ec9bb287cf70c33ca2"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a> { <br />
-&#160;&#160;<a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">HELP</a>
-, <a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2a0593585da9181e972974c1274d8f2b4f">DEBUG</a>
-, <a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2ab107229d44d042caa8ab8df4c8acaa1f">PRINT</a>
-, <a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12">LED</a>
-, <br />
-&#160;&#160;<a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2ac157bdf0b85a40d2619cbc8bc1ae5fe2">NONE</a>
-, <a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">err</a>
-, <a class="el" href="#ab73a326523c6a0ec9bb287cf70c33ca2ae2b9f991b7d1102a628eb677f83f89e6">NUM_CMDS</a>
-<br />
- }</td></tr>
-<tr class="memdesc:ab73a326523c6a0ec9bb287cf70c33ca2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumerated list of system commands.  <a href="#ab73a326523c6a0ec9bb287cf70c33ca2">More...</a><br /></td></tr>
 <tr class="memitem:aa8d2e1b59084ad8904d1a0e6d43d1a53" id="r_aa8d2e1b59084ad8904d1a0e6d43d1a53"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa8d2e1b59084ad8904d1a0e6d43d1a53">handler_type_t</a> { <a class="el" href="#aa8d2e1b59084ad8904d1a0e6d43d1a53a90f7c8492eafc306a58d467e459bb4f4">MEMBER_H</a>
 , <a class="el" href="#aa8d2e1b59084ad8904d1a0e6d43d1a53aa47ea66b63fa497ec9efbedb01be86f1">FREE_H</a>
  }</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
-Variables</h2></td></tr>
-<tr id="var-members-0" class="groupHeader"><td colspan="2"><div class="groupHeader">f_lut Flag lookup table declarations</div></td></tr>
-<tr><td colspan="2" class="ititle"><div class="groupText"><p>One table is defined for each command that supports flags. For commands without flags, the associated pointer in shell::cmd[] should be set to nullptr. </p>
-</div></td></tr>
-<tr class="memitem:a865d62d968934bf5e3a8deeea9d8dbf2" id="r_a865d62d968934bf5e3a8deeea9d8dbf2"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structflag__t.html">flag_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a> []</td></tr>
-<tr class="memitem:a5c9b5533c6591a48b5c76057c3aa99e9" id="r_a5c9b5533c6591a48b5c76057c3aa99e9"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structflag__t.html">flag_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5c9b5533c6591a48b5c76057c3aa99e9">debug_flags</a> []</td></tr>
-<tr class="memitem:a65ab7b53001f06938098fb1f03492ab5" id="r_a65ab7b53001f06938098fb1f03492ab5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structflag__t.html">flag_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65ab7b53001f06938098fb1f03492ab5">print_flags</a> []</td></tr>
-<tr class="memitem:a2e1519cb1f3075c3c55520b6c6b965ef" id="r_a2e1519cb1f3075c3c55520b6c6b965ef"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="structflag__t.html">flag_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2e1519cb1f3075c3c55520b6c6b965ef">led_flags</a> []</td></tr>
+<tr class="memitem:a5edd7aad54ac059bf561cf2f92017698" id="r_a5edd7aad54ac059bf561cf2f92017698"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5edd7aad54ac059bf561cf2f92017698">err_t</a> { <br />
+&#160;&#160;<a class="el" href="#a5edd7aad54ac059bf561cf2f92017698ab50339a10e1de285ac99d4c3990b8693">NONE</a>
+, <a class="el" href="#a5edd7aad54ac059bf561cf2f92017698aa58b79440c739316d6f475de4e869c1d">INVALID_CMD</a>
+, <a class="el" href="#a5edd7aad54ac059bf561cf2f92017698a09d07b7bee9a5b8ad075b18c7bbd91d9">UNKNOWN_FLAG</a>
+, <a class="el" href="#a5edd7aad54ac059bf561cf2f92017698a880c6606048520d07c601cc9e3abd726">MISSING_ARG</a>
+, <br />
+&#160;&#160;<a class="el" href="#a5edd7aad54ac059bf561cf2f92017698a017982bd3e0b7c4930a8ef3114b77844">RUNTIME_FAILURE</a>
+<br />
+ }</td></tr>
 </table>
 <a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
+<a id="a909c5ea10848001eea5ca727141144c4" name="a909c5ea10848001eea5ca727141144c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a909c5ea10848001eea5ca727141144c4">&#9670;&#160;</a></span>FLAGCOLOR</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define FLAGCOLOR&#160;&#160;&#160;<a class="el" href="colors_8h.html#a0a8ef1b5e1941b7257e545cc33405ff1aa60bd322f93178d68184e30e162571ca">GREEN</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af94cfb03461685fead1fe045d5c96f01" name="af94cfb03461685fead1fe045d5c96f01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af94cfb03461685fead1fe045d5c96f01">&#9670;&#160;</a></span>LINE</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define LINE&#160;&#160;&#160;this-&gt;puts_ro(<a class="el" href="ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c">ROSTR</a>(&quot;\r\n&quot;));</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a29b7451465deac204c5f7cb1f9c6e1fc" name="a29b7451465deac204c5f7cb1f9c6e1fc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a29b7451465deac204c5f7cb1f9c6e1fc">&#9670;&#160;</a></span>MAX_ARGS</h2>
 
@@ -196,39 +217,60 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a62ef7a7d14f1ce188f05591dac976f9a" name="a62ef7a7d14f1ce188f05591dac976f9a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a62ef7a7d14f1ce188f05591dac976f9a">&#9670;&#160;</a></span>PUT</h2>
+<a id="a71b54d0b460b084ebde26485a06b1adf" name="a71b54d0b460b084ebde26485a06b1adf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a71b54d0b460b084ebde26485a06b1adf">&#9670;&#160;</a></span>NAMECOLOR</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define PUT</td>
+          <td class="memname">#define NAMECOLOR</td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">puts_const(s)</div>
+<b>Value:</b><div class="fragment"><div class="line">(final_cmd[s].is_user ? <a class="code hl_enumvalue" href="colors_8h.html#a0a8ef1b5e1941b7257e545cc33405ff1ae735a848bf82163a19236ead1c3ef2d2">YELLOW</a> : <a class="code hl_enumvalue" href="colors_8h.html#a0a8ef1b5e1941b7257e545cc33405ff1aafe71cad474c15ce63b300c470eef8cc">CYAN</a>)</div>
+<div class="ttc" id="acolors_8h_html_a0a8ef1b5e1941b7257e545cc33405ff1aafe71cad474c15ce63b300c470eef8cc"><div class="ttname"><a href="colors_8h.html#a0a8ef1b5e1941b7257e545cc33405ff1aafe71cad474c15ce63b300c470eef8cc">CYAN</a></div><div class="ttdeci">@ CYAN</div><div class="ttdef"><b>Definition</b> colors.h:23</div></div>
+<div class="ttc" id="acolors_8h_html_a0a8ef1b5e1941b7257e545cc33405ff1ae735a848bf82163a19236ead1c3ef2d2"><div class="ttname"><a href="colors_8h.html#a0a8ef1b5e1941b7257e545cc33405ff1ae735a848bf82163a19236ead1c3ef2d2">YELLOW</a></div><div class="ttdeci">@ YELLOW</div><div class="ttdef"><b>Definition</b> colors.h:23</div></div>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="a4ee6e1bee73b45f4f6b7b86ef29a1e88" name="a4ee6e1bee73b45f4f6b7b86ef29a1e88"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4ee6e1bee73b45f4f6b7b86ef29a1e88">&#9670;&#160;</a></span>PUTLN</h2>
+<a id="a746390d1748a9831216d7c77723380bb" name="a746390d1748a9831216d7c77723380bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a746390d1748a9831216d7c77723380bb">&#9670;&#160;</a></span>PRINTLN</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define PUTLN</td>
+          <td class="memname">#define PRINTLN</td>
           <td>(</td>
           <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">puts_many(s, <span class="stringliteral">&quot;\r\n&quot;</span>, <span class="keyword">nullptr</span>)</div>
+<b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">do</span> {this-&gt;puts(s); this-&gt;puts(<span class="stringliteral">&quot;\r\n&quot;</span>);} <span class="keywordflow">while</span>(0)</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a405445cba8e05734137ddfcb76755871" name="a405445cba8e05734137ddfcb76755871"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a405445cba8e05734137ddfcb76755871">&#9670;&#160;</a></span>PUTLNP</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define PUTLNP</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>s</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">puts_many_ro(s, <a class="code hl_define" href="ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c">ROSTR</a>(<span class="stringliteral">&quot;\r\n&quot;</span>), <span class="keyword">nullptr</span>)</div>
+<div class="ttc" id="aro_8h_html_ae3fe46ffce091b6a22cdd407e459c60c"><div class="ttname"><a href="ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c">ROSTR</a></div><div class="ttdeci">#define ROSTR(x)</div><div class="ttdef"><b>Definition</b> ro.h:20</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -246,7 +288,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">puts_ro(s)</div>
+<b>Value:</b><div class="fragment"><div class="line">this-&gt;puts_ro(<a class="code hl_define" href="ro_8h.html#ae3fe46ffce091b6a22cdd407e459c60c">ROSTR</a>(s))</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -272,6 +314,25 @@ Variables</h2></td></tr>
 <div class="line">        <span class="keyword">const</span> <span class="keywordtype">char</span>* <span class="keyword">const</span> _ro_list_[] = { __VA_ARGS__, <span class="keyword">nullptr</span> }; \</div>
 <div class="line">        puts_many_ro_i(sh, _ro_list_); \</div>
 <div class="line">    } <span class="keywordflow">while</span>(0)</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="abc1d2f50899625122824b1a3f1ae1eab" name="abc1d2f50899625122824b1a3f1ae1eab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc1d2f50899625122824b1a3f1ae1eab">&#9670;&#160;</a></span>SH_USR_CMD</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define SH_USR_CMD</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">name(<span class="keyword">const</span> <a class="code hl_struct" href="structcommand__rt__t.html">command_rt_t</a>* self, <span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv)</div>
+<div class="ttc" id="astructcommand__rt__t_html"><div class="ttname"><a href="structcommand__rt__t.html">command_rt_t</a></div><div class="ttdef"><b>Definition</b> shell.h:82</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -318,14 +379,14 @@ Variables</h2></td></tr>
 </div>
 </div>
 <a name="doc-typedef-members" id="doc-typedef-members"></a><h2 id="header-doc-typedef-members" class="groupheader">Typedef Documentation</h2>
-<a id="af9667052b09a5914820878e5cbebec96" name="af9667052b09a5914820878e5cbebec96"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af9667052b09a5914820878e5cbebec96">&#9670;&#160;</a></span>cmd_handler</h2>
+<a id="acd42fda7a3240290200629ab5ec2cbd6" name="acd42fda7a3240290200629ab5ec2cbd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd42fda7a3240290200629ab5ec2cbd6">&#9670;&#160;</a></span>cmd_handler</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void(shell::* cmd_handler) (int argc, char **argv)</td>
+          <td class="memname">typedef void(shell::* cmd_handler) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *self, int argc, char **argv)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -341,28 +402,28 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="ac8e61212a9d2352594e6fe165ddaf37f" name="ac8e61212a9d2352594e6fe165ddaf37f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8e61212a9d2352594e6fe165ddaf37f">&#9670;&#160;</a></span>cmd_handler_free</h2>
+<a id="a095fb78859ff5c3f130ff24872fec195" name="a095fb78859ff5c3f130ff24872fec195"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a095fb78859ff5c3f130ff24872fec195">&#9670;&#160;</a></span>cmd_handler_free</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void(* cmd_handler_free) (int argc, char **argv)</td>
+          <td class="memname">typedef void(* cmd_handler_free) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *self, int argc, char **argv)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 </div>
 </div>
-<a id="af8f793ca6bf0b0179e3f722476f74504" name="af8f793ca6bf0b0179e3f722476f74504"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af8f793ca6bf0b0179e3f722476f74504">&#9670;&#160;</a></span>flag_handler</h2>
+<a id="a07261cc2aeb770b60d14de2cdb3b177b" name="a07261cc2aeb770b60d14de2cdb3b177b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07261cc2aeb770b60d14de2cdb3b177b">&#9670;&#160;</a></span>flag_handler</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void(shell::* flag_handler) (int argc, char **argv)</td>
+          <td class="memname">typedef void(shell::* flag_handler) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *parent, int argc, char **argv)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -378,14 +439,28 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a5a0e034a703e2354f3c6504e6cdf3856" name="a5a0e034a703e2354f3c6504e6cdf3856"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a0e034a703e2354f3c6504e6cdf3856">&#9670;&#160;</a></span>flag_handler_free</h2>
+<a id="a02be4e16475e157200e86e1f2ce78445" name="a02be4e16475e157200e86e1f2ce78445"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02be4e16475e157200e86e1f2ce78445">&#9670;&#160;</a></span>flag_handler_free</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void(* flag_handler_free) (int argc, char **argv)</td>
+          <td class="memname">typedef void(* flag_handler_free) (const <a class="el" href="structcommand__rt__t.html">command_rt_t</a> *parent, int argc, char **argv)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a522608051ebe81a0edec1c14b64f6b32" name="a522608051ebe81a0edec1c14b64f6b32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a522608051ebe81a0edec1c14b64f6b32">&#9670;&#160;</a></span>shell_io_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct <a class="el" href="structserial__io__s.html">serial_io_s</a> <a class="el" href="#a522608051ebe81a0edec1c14b64f6b32">shell_io_t</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -393,28 +468,31 @@ Variables</h2></td></tr>
 </div>
 </div>
 <a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
-<a id="ab73a326523c6a0ec9bb287cf70c33ca2" name="ab73a326523c6a0ec9bb287cf70c33ca2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab73a326523c6a0ec9bb287cf70c33ca2">&#9670;&#160;</a></span>command_id_t</h2>
+<a id="a5edd7aad54ac059bf561cf2f92017698" name="a5edd7aad54ac059bf561cf2f92017698"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5edd7aad54ac059bf561cf2f92017698">&#9670;&#160;</a></span>err_t</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2">command_id_t</a></td>
+          <td class="memname">enum class <a class="el" href="#a5edd7aad54ac059bf561cf2f92017698">err_t</a></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-
-<p>Enumerated list of system commands. </p>
-<p>Each command string parsed from user input is converted into one of these IDs. The mapping is performed by comparing user input against the command lookup table (shell::cmd[]). </p><dl class="section note"><dt>Note</dt><dd>The order of this enum must match the order of the entries in shell::cmd[] to ensure correct indexing </dd></dl>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824" name="ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824"></a>HELP&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ab73a326523c6a0ec9bb287cf70c33ca2a0593585da9181e972974c1274d8f2b4f" name="ab73a326523c6a0ec9bb287cf70c33ca2a0593585da9181e972974c1274d8f2b4f"></a>DEBUG&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ab73a326523c6a0ec9bb287cf70c33ca2ab107229d44d042caa8ab8df4c8acaa1f" name="ab73a326523c6a0ec9bb287cf70c33ca2ab107229d44d042caa8ab8df4c8acaa1f"></a>PRINT&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12" name="ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12"></a>LED&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ab73a326523c6a0ec9bb287cf70c33ca2ac157bdf0b85a40d2619cbc8bc1ae5fe2" name="ab73a326523c6a0ec9bb287cf70c33ca2ac157bdf0b85a40d2619cbc8bc1ae5fe2"></a>NONE&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99" name="ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99"></a>err&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="ab73a326523c6a0ec9bb287cf70c33ca2ae2b9f991b7d1102a628eb677f83f89e6" name="ab73a326523c6a0ec9bb287cf70c33ca2ae2b9f991b7d1102a628eb677f83f89e6"></a>NUM_CMDS&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698ab50339a10e1de285ac99d4c3990b8693" name="a5edd7aad54ac059bf561cf2f92017698ab50339a10e1de285ac99d4c3990b8693"></a>NONE&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698aa58b79440c739316d6f475de4e869c1d" name="a5edd7aad54ac059bf561cf2f92017698aa58b79440c739316d6f475de4e869c1d"></a>INVALID_CMD&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a09d07b7bee9a5b8ad075b18c7bbd91d9" name="a5edd7aad54ac059bf561cf2f92017698a09d07b7bee9a5b8ad075b18c7bbd91d9"></a>UNKNOWN_FLAG&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a880c6606048520d07c601cc9e3abd726" name="a5edd7aad54ac059bf561cf2f92017698a880c6606048520d07c601cc9e3abd726"></a>MISSING_ARG&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a5edd7aad54ac059bf561cf2f92017698a017982bd3e0b7c4930a8ef3114b77844" name="a5edd7aad54ac059bf561cf2f92017698a017982bd3e0b7c4930a8ef3114b77844"></a>RUNTIME_FAILURE&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -434,95 +512,6 @@ Variables</h2></td></tr>
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aa8d2e1b59084ad8904d1a0e6d43d1a53a90f7c8492eafc306a58d467e459bb4f4" name="aa8d2e1b59084ad8904d1a0e6d43d1a53a90f7c8492eafc306a58d467e459bb4f4"></a>MEMBER_H&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="aa8d2e1b59084ad8904d1a0e6d43d1a53aa47ea66b63fa497ec9efbedb01be86f1" name="aa8d2e1b59084ad8904d1a0e6d43d1a53aa47ea66b63fa497ec9efbedb01be86f1"></a>FREE_H&#160;</td><td class="fielddoc"></td></tr>
 </table>
-
-</div>
-</div>
-<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
-<a id="a5c9b5533c6591a48b5c76057c3aa99e9" name="a5c9b5533c6591a48b5c76057c3aa99e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5c9b5533c6591a48b5c76057c3aa99e9">&#9670;&#160;</a></span>debug_flags</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="structflag__t.html">flag_t</a> debug_flags[]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a865d62d968934bf5e3a8deeea9d8dbf2" name="a865d62d968934bf5e3a8deeea9d8dbf2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a865d62d968934bf5e3a8deeea9d8dbf2">&#9670;&#160;</a></span>help_flags</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="structflag__t.html">flag_t</a> help_flags[]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a2e1519cb1f3075c3c55520b6c6b965ef" name="a2e1519cb1f3075c3c55520b6c6b965ef"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e1519cb1f3075c3c55520b6c6b965ef">&#9670;&#160;</a></span>led_flags</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="structflag__t.html">flag_t</a> led_flags[]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a65ab7b53001f06938098fb1f03492ab5" name="a65ab7b53001f06938098fb1f03492ab5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a65ab7b53001f06938098fb1f03492ab5">&#9670;&#160;</a></span>print_flags</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">const <a class="el" href="structflag__t.html">flag_t</a> print_flags[]</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel extern">extern</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
 
 </div>
 </div>

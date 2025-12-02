@@ -7,5 +7,7 @@ var searchData=
   ['init_4',['init',['../classshell.html#a3a1086901f5f257150095554c0d3be16',1,'shell::init()'],['../class_u_s_a_r_t.html#af28156b6f25c6146f8540a5fbe15071f',1,'USART::init()']]],
   ['input_20buffer_20and_20tokenizer_5',['Input Buffer and Tokenizer',['../md__r_e_a_d_m_e.html#autotoc_md6',1,'1. Input Buffer and Tokenizer'],['../index.html#autotoc_md35',1,'1. Input Buffer and Tokenizer']]],
   ['integration_6',['Integration',['../md__r_e_a_d_m_e.html#autotoc_md17',1,'Integration'],['../index.html#integration',1,'Integration']]],
-  ['isr_7',['ISR',['../usart__tb_8cpp.html#a084f0a9cf05b1877bd8a71a90dae7ff8',1,'usart_tb.cpp']]]
+  ['invalid_5fcmd_7',['INVALID_CMD',['../shell_8h.html#a5edd7aad54ac059bf561cf2f92017698aa58b79440c739316d6f475de4e869c1d',1,'shell.h']]],
+  ['is_5fuser_8',['is_user',['../structcommand__rt__t.html#a6c38f000aeb6fd963af9b37b1265516c',1,'command_rt_t']]],
+  ['isr_9',['ISR',['../usart__tb_8cpp.html#a084f0a9cf05b1877bd8a71a90dae7ff8',1,'usart_tb.cpp']]]
 ];

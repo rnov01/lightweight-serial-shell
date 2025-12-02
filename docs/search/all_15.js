@@ -9,7 +9,7 @@ var searchData=
   ['tokenizer_6',['tokenizer',['../commands_8cpp.html#a567a007bb0b2531d795da75d5b69db3f',1,'tokenizer(char *buf, char **argv, int max_args):&#160;commands.cpp'],['../commands_8h.html#a567a007bb0b2531d795da75d5b69db3f',1,'tokenizer(char *buf, char **argv, int max_args):&#160;commands.cpp']]],
   ['tx_5fint_5fmode_7',['tx_int_mode',['../usart_8h.html#a0e8cefd4c4a38737facde2781d3df0b2',1,'usart.h']]],
   ['tx_5fmode_8',['tx_mode',['../usart_8h.html#ac1b73c245c833d920edd62ecf5ee5be9',1,'usart.h']]],
-  ['type_9',['type',['../structcommand__def__t.html#a23d3b5f9be9dfa5822b25e28f915ded6',1,'command_def_t::type'],['../structcommand__rt__t.html#aa86a3babbda554358db2f7935d8268e0',1,'command_rt_t::type']]],
+  ['type_9',['type',['../structcommand__def__t.html#a23d3b5f9be9dfa5822b25e28f915ded6',1,'command_def_t::type'],['../structcommand__rt__t.html#aa86a3babbda554358db2f7935d8268e0',1,'command_rt_t::type'],['../struct__err.html#a7321eeb8dbe54a3e41442f3357ce9b9c',1,'_err::type']]],
   ['typical_20backend_20model_10',['Typical Backend Model',['../md__r_e_a_d_m_e.html#autotoc_md18',1,'']]],
   ['typical_20usage_11',['Typical Usage',['../md__r_e_a_d_m_e.html#autotoc_md14',1,'Typical Usage'],['../index.html#usage',1,'Typical Usage']]]
 ];

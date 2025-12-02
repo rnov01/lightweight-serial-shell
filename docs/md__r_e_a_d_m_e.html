@@ -213,7 +213,7 @@ Integration</h1>
 <div class="line">    sh.poll();  <span class="comment">// process input and execute commands</span></div>
 <div class="line">}</div>
 <div class="ttc" id="aclass_u_s_a_r_t_html"><div class="ttname"><a href="class_u_s_a_r_t.html">USART</a></div><div class="ttdoc">Interface for AVR USART operation.</div><div class="ttdef"><b>Definition</b> usart.h:42</div></div>
-<div class="ttc" id="aclassshell_html"><div class="ttname"><a href="classshell.html">shell</a></div><div class="ttdoc">Driver class for the serial shell interface.</div><div class="ttdef"><b>Definition</b> shell.h:123</div></div>
+<div class="ttc" id="aclassshell_html"><div class="ttname"><a href="classshell.html">shell</a></div><div class="ttdoc">Driver class for the serial shell interface.</div><div class="ttdef"><b>Definition</b> shell.h:111</div></div>
 </div><!-- fragment --><p>The shell is transport-agnostic. <br  />
  Any backend capable of providing characters to the shell will work.</p>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
@@ -260,29 +260,28 @@ Command ID Enum Entry</h2>
 <h2 class="doxsection"><a class="anchor" id="autotoc_md24"></a>
 Command Table Entry</h2>
 <div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="structcommand__t.html">command_t</a> shell::cmd[] = {</div>
-<div class="line">    {<span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Show list of supported commands&quot;</span>, &amp;shell::cmd_help, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">HELP</a>, <a class="code hl_variable" href="shell_8h.html#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a>},</div>
+<div class="line">    {<span class="stringliteral">&quot;help&quot;</span>, <span class="stringliteral">&quot;Show list of supported commands&quot;</span>, &amp;shell::cmd_help, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a9f5cb747b2e1f0ea781d2b1f2a5b4824">HELP</a>, help_flags},</div>
 <div class="line">    {<span class="stringliteral">&quot;led&quot;</span>,  <span class="stringliteral">&quot;Toggle onboard LED&quot;</span>, &amp;shell::cmd_led, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2a21447137d62c46e603b924d455e8cd12">LED</a>, <span class="keyword">nullptr</span>},</div>
 <div class="line">    {<span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <a class="code hl_enumvalue" href="commands_8h.html#ab73a326523c6a0ec9bb287cf70c33ca2ac16f69770bf5601fbace0a55304daa99">err</a>, <span class="keyword">nullptr</span>}</div>
 <div class="line">};</div>
-<div class="ttc" id="ashell_8h_html_a865d62d968934bf5e3a8deeea9d8dbf2"><div class="ttname"><a href="shell_8h.html#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a></div><div class="ttdeci">const flag_t help_flags[]</div></div>
 <div class="ttc" id="astructcommand__t_html"><div class="ttname"><a href="structcommand__t.html">command_t</a></div><div class="ttdef"><b>Definition</b> commands.h:18</div></div>
 </div><!-- fragment --><p>This table must be defined <b>exactly once</b> in <span class="tt"><a class="el" href="lut_8cpp.html">lut.cpp</a></span>.</p>
 <hr  />
 <h2 class="doxsection"><a class="anchor" id="autotoc_md26"></a>
 Flag Table Entry</h2>
-<div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="structflag__t.html">flag_t</a> <a class="code hl_variable" href="shell_8h.html#a865d62d968934bf5e3a8deeea9d8dbf2">help_flags</a>[] = {</div>
+<div class="fragment"><div class="line"><span class="keyword">const</span> <a class="code hl_struct" href="structflag__t.html">flag_t</a> help_flags[] = {</div>
 <div class="line">    { <span class="stringliteral">&quot;-long&quot;</span>, <span class="stringliteral">&quot;Show command descriptions&quot;</span>, &amp;shell::f_help_long },</div>
 <div class="line">    { <span class="stringliteral">&quot;-c&quot;</span>,    <span class="stringliteral">&quot;Show flags for a command&quot;</span>, &amp;shell::f_help_c },</div>
 <div class="line">    { <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span> }</div>
 <div class="line">};</div>
-<div class="ttc" id="astructflag__t_html"><div class="ttname"><a href="structflag__t.html">flag_t</a></div><div class="ttdoc">Describes a single flag (subcommand) associated with a primary command.</div><div class="ttdef"><b>Definition</b> shell.h:68</div></div>
+<div class="ttc" id="astructflag__t_html"><div class="ttname"><a href="structflag__t.html">flag_t</a></div><div class="ttdoc">Describes a single flag (subcommand) associated with a primary command.</div><div class="ttdef"><b>Definition</b> shell.h:57</div></div>
 </div><!-- fragment --><p>Flag tables should also be defined in <span class="tt"><a class="el" href="lut_8cpp.html">lut.cpp</a></span>.</p>
 <hr  />
 <h2 class="doxsection"><a class="anchor" id="autotoc_md28"></a>
 Command Handler Example</h2>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> shell::cmd_help(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv) {</div>
 <div class="line">    <span class="keywordflow">if</span> (argc == 1) {</div>
-<div class="line">        <a class="code hl_function" href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">puts_const</a>(<span class="stringliteral">&quot;Available commands:\r\n&quot;</span>);</div>
+<div class="line">        puts_const(<span class="stringliteral">&quot;Available commands:\r\n&quot;</span>);</div>
 <div class="line">        <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; <a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name != <span class="keyword">nullptr</span>; i++) {</div>
 <div class="line">            <a class="code hl_function" href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">puts_many</a>(<a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name, <span class="stringliteral">&quot;\r\n&quot;</span>, <span class="keyword">nullptr</span>);</div>
 <div class="line">        }</div>
@@ -297,18 +296,17 @@ Command Handler Example</h2>
 <div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-<div class="ttc" id="aclassshell_html_a0ef2577e3593b6625c8727b10f33850b"><div class="ttname"><a href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">shell::puts_many</a></div><div class="ttdeci">void puts_many(const char *first,...)</div><div class="ttdoc">Print multiple concatenated strings separated by commmas.</div><div class="ttdef"><b>Definition</b> shell.cpp:84</div></div>
-<div class="ttc" id="aclassshell_html_a7be2bdd33c2361aa8ce54253a678601e"><div class="ttname"><a href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">shell::puts_const</a></div><div class="ttdeci">void puts_const(const char *s)</div><div class="ttdoc">Used to trasmit constant string (string literal)</div><div class="ttdef"><b>Definition</b> shell.cpp:81</div></div>
+<div class="ttc" id="aclassshell_html_a0ef2577e3593b6625c8727b10f33850b"><div class="ttname"><a href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">shell::puts_many</a></div><div class="ttdeci">void puts_many(const char *first,...)</div><div class="ttdoc">Print multiple concatenated strings separated by commmas.</div><div class="ttdef"><b>Definition</b> shell.cpp:79</div></div>
 <div class="ttc" id="acommands_8h_html_ae265a4132f212d84a4a0ebe470bdb977"><div class="ttname"><a href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a></div><div class="ttdeci">const command_t cmd[NUM_CMDS]</div><div class="ttdef"><b>Definition</b> commands.h:28</div></div>
 </div><!-- fragment --><hr  />
 <h2 class="doxsection"><a class="anchor" id="autotoc_md30"></a>
 Flag Handler Example</h2>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> shell::f_help_long(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span> **argv) {</div>
-<div class="line">    <a class="code hl_function" href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">puts_const</a>(<span class="stringliteral">&quot;Full command descriptions:\r\n&quot;</span>);</div>
+<div class="line">    puts_const(<span class="stringliteral">&quot;Full command descriptions:\r\n&quot;</span>);</div>
 <div class="line">    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; <a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name != <span class="keyword">nullptr</span>; i++) {</div>
 <div class="line">        <a class="code hl_function" href="classshell.html#a0ef2577e3593b6625c8727b10f33850b">puts_many</a>(<a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].name, <span class="stringliteral">&quot; - &quot;</span>, <a class="code hl_variable" href="commands_8h.html#ae265a4132f212d84a4a0ebe470bdb977">cmd</a>[i].description, <span class="stringliteral">&quot;\r\n&quot;</span>, <span class="keyword">nullptr</span>);</div>
 <div class="line">    }</div>
-<div class="line">    <a class="code hl_function" href="classshell.html#a7be2bdd33c2361aa8ce54253a678601e">puts_const</a>(<span class="stringliteral">&quot;\r\nUse -c &lt;command&gt; to list flags for a specific command\r\n&quot;</span>);</div>
+<div class="line">    puts_const(<span class="stringliteral">&quot;\r\nUse -c &lt;command&gt; to list flags for a specific command\r\n&quot;</span>);</div>
 <div class="line">}</div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- PageDoc -->

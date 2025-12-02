@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ro.h"
 #define __COLOR_ON__
 
@@ -15,3 +17,8 @@
     #define COLOR_RED    
     #define COLOR_RESET  
 #endif
+
+
+enum color_t {
+    CYAN, YELLOW, GREEN, RED, RST
+};

@@ -79,7 +79,7 @@ uint8_t USART::receive(void) {
     return *UDRn; 
 } 
 
-void USART::put_string(char* str) { 
+void USART::put_string(const char* str) { 
     while (*str) { 
         while (!ready()); 
         write(*str++); 
@@ -94,3 +94,16 @@ void USART::put_stringP(PGM_P str) {
         putc(b); 
     } 
 } 
+
+void putc_wrapper(char c, void* self) {
+    USART* u = (USART*)self;
+    u->putc(c);
+}
+void puts_wrapper(const char* s, void* self) {
+    USART* u = (USART*)self;
+    u->put_string(s);
+}
+void putsP_wrapper(const char* s, void* self) {
+    USART* u = (USART*)self;
+    u->put_stringP(s);
+}
