@@ -19,7 +19,7 @@ struct command_rt_t;
  *  associated flag handlers (f_* functions) if any flags were supplied via terminal input. 
  *  \param argc Number of parsed arguments (command + flags + parameters) 
  *  \param argv Array of pointers to parsed argument strings */
-typedef void (shell::*cmd_handler)(const command_rt_t* self, int argc, char **argv);
+typedef void (shell::*cmd_handler)(const command_rt_t* self, const char* param, int argc, char **argv);
 /*! \brief Function pointer type for flag handlers (f_* functions)
  *  \details These functions implement the behavior of flags/subcommands associated with a primary command. They
     are called <i>only</i> from within their respective cmd_* command handler.
@@ -27,7 +27,7 @@ typedef void (shell::*cmd_handler)(const command_rt_t* self, int argc, char **ar
  *  \param argv Array of pointers to parsed argument strings */
 typedef void (shell::*flag_handler)(const command_rt_t* parent, const char* param, int argc, char **argv);
 
-typedef void(*cmd_handler_free)(const command_rt_t* self, int argc, char **argv);
+typedef void(*cmd_handler_free)(const command_rt_t* self, const char* param, int argc, char **argv);
 typedef void(*flag_handler_free)(const command_rt_t* parent, const char* param, int argc, char **argv);
 
 typedef struct serial_io_s {
@@ -57,6 +57,10 @@ enum flag_mode_t {
 
 enum flag_param_t {
     FNO_PARAM, FREQ_PARAM, FOPT_PARAM
+};
+
+enum cmd_param_t {
+    CNO_PARAM, CREQ_PARAM, COPT_PARAM
 };
 
 /*! \struct flag_t 
@@ -98,6 +102,7 @@ struct command_def_t {      //order identical as enum for easy lookup
     cmd_handler_u exe;
     flag_mode_t flag_mode;
     bool in_progmem;
+    cmd_param_t param_mode;
 };
 
 //runtime mutable struct
@@ -108,6 +113,7 @@ struct command_rt_t {
         flag_mode_t flag_mode;
         const flag_t* flags[MAX_FLAGS]; 
         uint8_t flag_count;
+        const char* param;
         int id;
         bool is_user;
 };
@@ -120,6 +126,7 @@ enum class err_t {
    RUNTIME_FAILURE,
    INVALID_PARAM
 };
+
 typedef struct _err {
     err_t type; 
     const char* description;
@@ -172,7 +179,7 @@ public:
     void printc(color_t color, const char* s);         //color string
   
     //user helper funcs
-    void execute(const command_rt_t* cmd, int argc, char** argv);
+    void execute(command_rt_t* cmd, int argc, char** argv);
     void dispatch_handler(const command_rt_t* cmd, int argc, char** argv);
     const flag_t* find_flag(const command_rt_t* cmd, const char* n);
     bool has_flag(int argc, char **argv, const char* f);    //check if user input has flag argument
@@ -212,10 +219,10 @@ private:
     command_rt_t* get_cmd(const char* name);
     const flag_t* const* get_cmd_flags(const char* parent);
     //command handler functions
-    void cmd_help(const command_rt_t* self, int argc, char **argv);
-    void cmd_debug(const command_rt_t* self, int argc, char **argv);
-    void cmd_print(const command_rt_t* self, int argc, char **argv);
-    void cmd_led(const command_rt_t* self, int argc, char **argv);
+    void cmd_help(const command_rt_t* self, const char* param, int argc, char **argv);
+    void cmd_debug(const command_rt_t* self, const char* param, int argc, char **argv);
+    void cmd_print(const command_rt_t* self, const char* param, int argc, char **argv);
+    void cmd_led(const command_rt_t* self, const char* param, int argc, char **argv);
     //flag handler functions
     //help flags
     void f_help_long(const command_rt_t* parent, const char* param, int argc, char **argv);
@@ -260,9 +267,9 @@ private:
 
 //user table macro helpers
 
-#define CMD(name, description, handler, mode) \
-    {name, description, FREE_H, {.free = handler}, mode, false}
-#define CMD_END {nullptr, nullptr, FREE_H, {.free = nullptr}, FLAG_ONLY, false}
+#define CMD(name, description, handler, mode, param_mode) \
+    {name, description, FREE_H, {.free = handler}, mode, false, param_mode}
+#define CMD_END {nullptr, nullptr, FREE_H, {.free = nullptr}, FLAG_ONLY, false, CNO_PARAM}
 
 #define FLAG(parent, flagname, description, handler, param_mode) \
     {flagname, description, FREE_H, {.free = handler}, parent, false, param_mode}

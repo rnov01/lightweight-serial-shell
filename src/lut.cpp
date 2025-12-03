@@ -18,11 +18,11 @@ const flag_t shell::sys_flags[] = {
 //command lut
 //commands w/o flags get nullptr for flag_t arg
 const command_def_t shell::cmd[] = {
-    {help_n, help_d, MEMBER_H, &shell::cmd_help, FLAG_ONLY, true},
-    {debug_n, debug_d, MEMBER_H, &shell::cmd_debug, BASE_THEN_FLAGS, true},
-    {print_n, print_d, MEMBER_H, &shell::cmd_print, BASE_THEN_FLAGS, true},
-    {led_n, led_d, MEMBER_H, &shell::cmd_led, FLAG_ONLY,true},
-    {nullptr, nullptr, MEMBER_H, nullptr, BASE_THEN_FLAGS, false}
+    {help_n, help_d, MEMBER_H, &shell::cmd_help, FLAG_ONLY, true, CNO_PARAM},
+    {debug_n, debug_d, MEMBER_H, &shell::cmd_debug, BASE_THEN_FLAGS, true, COPT_PARAM},
+    {print_n, print_d, MEMBER_H, &shell::cmd_print, BASE_THEN_FLAGS, true, CREQ_PARAM},
+    {led_n, led_d, MEMBER_H, &shell::cmd_led, FLAG_ONLY,true, COPT_PARAM},
+    {nullptr, nullptr, MEMBER_H, nullptr, BASE_THEN_FLAGS, false, CNO_PARAM}
 };
 
 const _err shell::err_msg[] = {

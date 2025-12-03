@@ -128,25 +128,22 @@ void shell::printc(color_t color, const char* s) {
     puts_ro(C_);
 }
 
-void shell::execute(const command_rt_t* cmd, int argc, char** argv) {
+void shell::execute(command_rt_t* cmd, int argc, char** argv) {
     if(!cmd) return;
     parsed_flag_t parsed_flags[MAX_FLAGS];
     uint8_t parsed_flags_count = 0;
 
+    cmd->param = nullptr;
+
     for (int i=1; i<argc; i++) {
         const char* arg = argv[i];
-        
+
         if(arg[0] == '-' && arg[1] != '\0') {
             const flag_t* flag = find_flag(cmd, argv[i]);
 
-            if (!flag) {
-                error(err_t::UNKNOWN_FLAG, arg);
-                return;
-            }
+            if (!flag) { error(err_t::UNKNOWN_FLAG, arg); return; }
 
-            parsed_flag_t pf;
-            pf.flag = flag;
-            pf.param = nullptr;
+            parsed_flag_t pf = {flag, nullptr};
 
             if (flag->param_mode != FNO_PARAM) {
                 if (i+1 >= argc) {
@@ -154,7 +151,6 @@ void shell::execute(const command_rt_t* cmd, int argc, char** argv) {
                         error(err_t::MISSING_ARG, flag->name);
                         return;
                     }
-                }else {
                     pf.param = argv[++i];
                 }
             }
@@ -164,8 +160,30 @@ void shell::execute(const command_rt_t* cmd, int argc, char** argv) {
             }
             parsed_flags[parsed_flags_count++] = pf;
            
-        } else {}
+        } else {
+            if(cmd->param) {
+                error(err_t::INVALID_CMD, "Too many parameters");
+                return;
+            }
+            cmd->param = arg;
+        }
         
+    }
+    switch (cmd->def->param_mode) {
+        case CREQ_PARAM:
+            if(!cmd->param) {
+                error(err_t::MISSING_ARG, cmd->def->name);
+                return;
+            }
+            break;
+        case CNO_PARAM:
+            if (cmd->param) {
+                error(err_t::INVALID_PARAM, cmd->param);
+                return;
+            }
+            break;
+        case COPT_PARAM:
+            break;
     }
 
     switch (cmd->flag_mode) {
@@ -198,9 +216,9 @@ void shell::execute(const command_rt_t* cmd, int argc, char** argv) {
 
 void shell::dispatch_handler(const command_rt_t* cmd, int argc, char** argv) {
             if (cmd->type == MEMBER_H)
-                (this->*(cmd->exe.mem))(cmd, argc, argv);
+                (this->*(cmd->exe.mem))(cmd, cmd->param, argc, argv);
             else 
-                cmd->exe.free(cmd, argc, argv);
+                cmd->exe.free(cmd, cmd->param, argc, argv);
 }
 
 //returns a specified flag
@@ -304,6 +322,7 @@ void shell::build_cmd_table(const command_def_t* table) {
             final_cmd[final_count].id = final_count;
             final_cmd[final_count].flag_mode = table[i].flag_mode;
             final_cmd[final_count].is_user = !is_sys_table;
+            final_cmd[final_count].param = nullptr;
             
             //clr flags (populate by build flag links)
             for(int k=0; k<MAX_FLAGS; k++) {
@@ -428,7 +447,7 @@ void shell::f_help_c(const command_rt_t* parent, const char* param, int argc, ch
     error(err_t::INVALID_PARAM, param);
 }
 
-void shell::cmd_help(const command_rt_t* self, int argc, char **argv) {
+void shell::cmd_help(const command_rt_t* self, const char* param, int argc, char **argv) {
     if (argc == 1) {
         puts_ro(ROSTR("\r\nHere is a list of system commands:\r\n"));
         puts_ro(ROSTR("----------------------------------\r\n"));
@@ -440,12 +459,14 @@ void shell::cmd_help(const command_rt_t* self, int argc, char **argv) {
     } 
 }
 
-void shell::cmd_debug(const command_rt_t* self, int argc, char **argv) {
+void shell::cmd_debug(const command_rt_t* self, const char* param, int argc, char **argv) {
     
 }
 
-void shell::cmd_print(const command_rt_t* self, int argc, char **argv) {
-
+void shell::cmd_print(const command_rt_t* self, const char* param, int argc, char **argv) {
+    if (param) {
+        puts(param);
+    }
 }
 
 void shell::f_led_blink(const command_rt_t* parent, const char* param, int argc, char **argv) {
@@ -462,7 +483,7 @@ void shell::f_led_blink(const command_rt_t* parent, const char* param, int argc,
     }
 }
 
-void shell::cmd_led(const command_rt_t* self, int argc, char **argv) {
+void shell::cmd_led(const command_rt_t* self, const char* param, int argc, char **argv) {
     if (argc == 1) {
         toggle(PIN_B7);
     } 
