@@ -1,7 +1,7 @@
 #include "../include/usart.h"
 #include "../include/pin.h"
 #include "../include/ring_buffer.h"
-#include "../include/shell.h"
+#include "../include/shell_api.h"
 #include "../include/user_commands.h"
 #include <stdint.h>
 #include <avr/delay.h>
@@ -63,13 +63,13 @@ ISR(USART0_RX_vect) {
     uint8_t c = UDR0;
     buf_push(&GLOBAL_BUFFER, c);
 }
-
+shell* active_shell = nullptr;
 int run_usart_test() {
 
     USART USART0(PIN_E1, PIN_E0, _SFR_MEM_ADDR(UCSR0A), _SFR_MEM_ADDR(UCSR0B), _SFR_MEM_ADDR(UBRR0), _SFR_MEM_ADDR(UDR0));
     USART0.init(19200, rx_int_mode::en, tx_int_mode::dis, 
         data_int_mode::dis, rx_mode::en, tx_mode::en, spd_mode::norm);
-
+    
     shell_io_t io = {
         .putc = putc_wrapper,
         .puts = puts_wrapper,
@@ -78,6 +78,9 @@ int run_usart_test() {
     };
 
     shell sh(&io);  //init shell
+    active_shell = &sh;
+   
+
 
     sei();
 
@@ -87,6 +90,8 @@ int run_usart_test() {
         set_output(PIN_G0);
         
         set_output(PIN_B7);
+
+        //g_shell = &sh;
         sh.init(usr_cmds, usr_flags);
     while (1) {
         sh.poll();
