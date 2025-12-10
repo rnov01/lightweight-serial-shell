@@ -198,8 +198,8 @@ public:
 private:
     shell_io_t* io;
 
-    char cmd_buffer[64];
-    char sh_line[64];
+    //char cmd_buffer[32];
+    char sh_line[32];
     uint8_t line_len = 0;
 
     char *_argv[MAX_ARGS];
@@ -209,7 +209,7 @@ private:
     void build_flag_links(const flag_t* table);
     void build_sys_flag_links(void);
     void attach_flag_to_command(command_rt_t* cmd, const flag_t* flag);
-    static const int MAX_CMD = 50;
+    static const int MAX_CMD = 32;
     command_rt_t final_cmd[MAX_CMD];
     int final_count = 0;
 

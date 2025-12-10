@@ -13,8 +13,8 @@ TARGET     = atmega2560_shell
 # File Structure
 # ============================================================
 
-SRC_DIR    = src
-INC_DIR    = include
+SRC_DIR    = core_c/src
+INC_DIR    = core_c/include
 
 # main file stays in top-level directory
 MAIN       = main.cpp
@@ -22,7 +22,8 @@ MAIN       = main.cpp
 # Collect all C/C++ source files
 SRC        = $(MAIN) \
 			$(filter-out $(SRC_DIR)/commands.cpp, $(wildcard $(SRC_DIR)/*.cpp)) \
-			$(wildcard $(SRC_DIR)/*.c)
+			$(wildcard $(SRC_DIR)/*.c) \
+			legacy_cpp/src/usart.cpp
 
 OBJ        = $(SRC:.cpp=.o)
 OBJ        := $(OBJ:.c=.o)
