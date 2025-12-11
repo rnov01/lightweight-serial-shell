@@ -8,7 +8,7 @@ extern "C" {
 #include "legacy_cpp/include/pin.h"
 #include "legacy_cpp/include/ring_buffer.h"
 #include <stdint.h>
-#include <avr/delay.h>
+#include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <string.h>
@@ -33,7 +33,7 @@ int main() {
    
     static char line_buf[32];
     static char* argv[8];
-    uint8_t argc;
+
     //connect user-wrapped functions to shell interface
     static shell_t sh;
   

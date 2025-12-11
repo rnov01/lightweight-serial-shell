@@ -1,18 +1,132 @@
-# Lightweight Embedded Serial Shell
+# Lightweight Embedded Serial Shell (C API)
 
 ## Overview
 
-This project implements a lightweight command-line shell for microcontrollers.  
-The shell operates over a serial interface (typically USART) and provides a minimal terminal for interacting with a microcontroller without requiring a full RTOS or filesystem.
+This project implements a small, hardware-agnostic command-line shell for microcontrollers.  
 
-This design focuses on:
+The shell operates over any byte-oriented interface (typically USART) and provides a minimal terminal for interacting with a microcontroller without requiring a full RTOS or filesystem.
 
-- low resource usage  
-- non-blocking behavior for simple integration  
+Design Goals:
 
-The shell supports user-defined commands and flags/subcommands, allowing firmware developers to expose debugging tools, configuration interfaces, and system features through a familiar terminal-style syntax.
+- **Low resource usage** - (`<10kB flash and ~440 bytes RAM on ATmega2560 reference build`)
+- **Portable C API** - Pure C core, hardware independent; plug in any serial backend
+- **Configurable commands and flags** - Easily extendable command/flag system
+- **Non-blocking behavior** - simple integration into existing main loops or state machines
+
+The shell core is hardware-neutral. You provide:
+
+- A `putchar`-style callback for output
+- A buffer for incoming lines
+- Command / flag tables and handlers defining your shell commands
+
+This lightweight build includes 5 built-in commands:
+
+- `help` - provides info about commands and flags
+- `dump` - prints command/flag lookup tables
+- `ver` - show firmware version and build info
+- `mem` - display shell memory settings
+- `peek` - read a byte (or 2, or 4 with -16 and -32 flags) from a specified memory address
+
+These commands can be easily batch removed or individually toggled at compile-time to save space.
 
 ---
+
+## Quick Start
+
+### Configure the Shell
+
+1. In `shell_config.h`, set basic limits and enable built-in commands as needed:
+
+```c
+#define IN_BUFFER_SIZE     64   // max input line length
+#define MAX_ARGS          8     // max number of args (including command and flags)
+#define MAX_FLAGS        4      // max number of flags per command
+
+#define SYS_CORE              // enable core system commands (optional)
+```
+2. Define user commands (optional):
+
+If you have no user commands, you can pass `NULL` and `0` to `sh_init()` for the `user_cmds` and `cmd_count` parameters.
+Otherwise, define them in a table:
+
+```c
+#include "shell.h"
+
+static void cmd_led(shell_t* sh, const shell_cmd_t* self, const char* param, int argc, char** argv);
+
+static const shell_cmd_t user_cmds[] = {
+    { "led", "Toggle onboard LED", cmd_led, NULL, .sub = { CMD_NO_FLAG, NOPARAM, false, 0} }
+};
+```
+
+3. Allocate an input buffer and initialize the shell:
+
+```c
+#include "shell.h"
+#include "shell_sys.h" 
+#include "shell_config.h"
+
+#define INBUF_SIZE IN_BUFFER_SIZE
+#define MAX_ARG MAX_ARGS
+
+static char in_buffer[INBUF_SIZE];
+static char* argv[MAX_ARG];
+static shell_t sh;
+
+static void my_putc(char c, void* user) {
+    (void)user;
+    uart_write_blocking(c);  // your UART driver here
+}
+
+int main(void) {
+    sh_init(&sh,    
+            user_cmds, //or NULL if no user commands
+            in_buffer, 
+            INBUF_SIZE, 
+            argv, 
+            MAX_ARG,
+            my_putc, 
+            NULL,       //io_user = NULL for simple backends
+            sizeof(user_cmds)/sizeof(user_cmds[0]));
+
+    while (1) {
+        int c = uart_read_nonblocking(); // returns -1 if no data
+        if (c >= 0) {
+            sh_poll(&sh, (uint8_t)c);  
+        }
+        //rest of main loop...
+    }
+}
+```
+
+4. Example command handler:
+
+```c
+static void cmd_led(shell_t* sh, const shell_cmd_t* self, const char* param, int argc, char** argv) {
+    // Toggle LED logic here
+    sh_puts(sh, "LED toggled!\r\n");
+}
+```
+5. Build and Flash:
+
+- Makefile is provided for AVR-GCC and ARM GCC; modify as needed for your platform and target.
+
+```sh
+make avrflash
+make stm32flash
+```
+
+
+
+At this point, you should be able to connect a serial terminal and type:
+```
+help
+ver
+peek 0xC0 
+led
+```
+
+
 
 ## Key Features
 

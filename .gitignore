@@ -23,6 +23,7 @@ build/
 out/
 bin/
 obj/
+docs/
 
 # If using Makefile out-of-tree builds:
 */build/

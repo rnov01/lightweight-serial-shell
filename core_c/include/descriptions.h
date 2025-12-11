@@ -3,25 +3,31 @@
 
 
 #if HELP_CMD
-extern const char help_n[]  = "help";
-extern const char help_d[] RODATA = "Provides a list of system commands";
-    extern const char help_lf_d[] RODATA = "Gives a short description of each available command";
-    extern const char help_cf_d[] RODATA = "Use -c <command> for a list of associated flags";
+extern const char help_n[];
+extern const char help_d[] RODATA;
+   extern const char help_cf_d[];
 #endif
 
 #if DUMP_CMD
-const char dump_n[] = "dump";
-const char dump_d[] RODATA = "Provides a list of system table data";
-    const char dump_cf_d[] RODATA = "List internal command table";
-    const char dump_ff_d[] RODATA = "List internal flag table";
+extern const char dump_n[];
+extern const char dump_d[] RODATA;
+    extern const char dump_vf_d[] RODATA;
 #endif
 
 #if VER_CMD
-const char ver_n[] = "ver";
-const char ver_d[] RODATA = "display firmware and build info";
+extern const char ver_n[];
+extern const char ver_d[] RODATA;
 #endif
 
 #if MEM_CMD
-const char mem_n[] = "mem";
-const char mem_d[] RODATA = "display flashed memory settings";
+extern const char mem_n[];
+extern const char mem_d[] RODATA;
+#endif
+
+#if PEEK_CMD
+extern const char peek_n[];
+extern const char peek_d[] RODATA;
+    extern const char peek16_d[] RODATA;
+    extern const char peek32_d[] RODATA;
+
 #endif
