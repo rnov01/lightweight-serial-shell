@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#define RING_BUFFER_SIZE 128
+#define RING_BUFFER_SIZE 32
 
 struct ringbuf {
     volatile uint8_t buf[RING_BUFFER_SIZE];

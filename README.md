@@ -6,12 +6,12 @@ This project implements a small, hardware-agnostic command-line shell for microc
 
 The shell operates over any byte-oriented interface (typically USART) and provides a minimal terminal for interacting with a microcontroller without requiring a full RTOS or filesystem.
 
-Design Goals:
+Highlights:
 
-- **Low resource usage** - (`<10kB flash and ~440 bytes RAM on ATmega2560 reference build`)
+- **Low resource usage** - (`<10kB flash and ~330 bytes RAM on ATmega2560 for all core features and input buffering; can be reduced further`)
 - **Portable C API** - Pure C core, hardware independent; plug in any serial backend
 - **Configurable commands and flags** - Easily extendable command/flag system
-- **Non-blocking behavior** - simple integration into existing main loops or state machines
+- **Non-blocking behavior** - Simple integration into existing main loops or state machines
 
 The shell core is hardware-neutral. You provide:
 
@@ -21,11 +21,11 @@ The shell core is hardware-neutral. You provide:
 
 This lightweight build includes 5 built-in commands:
 
-- `help` - provides info about commands and flags
-- `dump` - prints command/flag lookup tables
-- `ver` - show firmware version and build info
-- `mem` - display shell memory settings
-- `peek` - read a byte (or 2, or 4 with -16 and -32 flags) from a specified memory address
+`help` - provides info about commands and flags
+`dump` - prints command/flag lookup tables
+`ver` - show firmware version and build info
+`mem` - display shell memory settings
+`peek` - read a byte (or 2, or 4 with -16 and -32 flags) from a specified memory address
 
 These commands can be easily batch removed or individually toggled at compile-time to save space.
 
@@ -38,11 +38,11 @@ These commands can be easily batch removed or individually toggled at compile-ti
 1. In `shell_config.h`, set basic limits and enable built-in commands as needed:
 
 ```c
-#define IN_BUFFER_SIZE     64   // max input line length
-#define MAX_ARGS          8     // max number of args (including command and flags)
-#define MAX_FLAGS        4      // max number of flags per command
+#define LINE_BUFFER_SIZE    32      // max input line length
+#define MAX_ARGS            8       // max number of args (including command and flags)
+#define MAX_FLAGS           4       // max number of flags per command
 
-#define SYS_CORE              // enable core system commands (optional)
+#define SYS_CORE                    // enable core system commands (optional)
 ```
 2. Define user commands (optional):
 
@@ -66,11 +66,8 @@ static const shell_cmd_t user_cmds[] = {
 #include "shell_sys.h" 
 #include "shell_config.h"
 
-#define INBUF_SIZE IN_BUFFER_SIZE
-#define MAX_ARG MAX_ARGS
-
-static char in_buffer[INBUF_SIZE];
-static char* argv[MAX_ARG];
+static char in_buffer[LINE_BUFFER_SIZE];
+static char* argv[MAX_ARGS];
 static shell_t sh;
 
 static void my_putc(char c, void* user) {
@@ -82,9 +79,9 @@ int main(void) {
     sh_init(&sh,    
             user_cmds, //or NULL if no user commands
             in_buffer, 
-            INBUF_SIZE, 
+            LINE_BUFFER_SIZE, 
             argv, 
-            MAX_ARG,
+            MAX_ARGS,
             my_putc, 
             NULL,       //io_user = NULL for simple backends
             sizeof(user_cmds)/sizeof(user_cmds[0]));
@@ -127,231 +124,130 @@ led
 ```
 
 
+## Memory Breakdown
 
-## Key Features
+*This is based on an ATmega2560 reference build with 5 system commands enabled and feeding `sh_poll()` directly in ISR (no buffering).*
 
-- **Configurable commands**  
-  Commands can be added by inserting an entry in the command lookup table and creating a matching `cmd_*` handler function.
+|Command  | Flash (bytes) | RAM (bytes) |
+|---------|----------------|--------------|
+|help    |  1358          |   30          |
+|dump    |  1402          |   26          |
+|ver     |   418          |   30          |
+|mem     |   346          |   14          |
+|peek    |   846          |   50          |
 
-- **Flag-based subcommands**  
-  Flags are defined per command in their own lookup tables and implemented with `f_*` handler functions.
+**Shell Core Total:** 8180 bytes flash, 291 bytes RAM
 
-- **Hardware flexibility**  
-  The shell itself is hardware agnostic; only the serial driver layer is MCU-specific.
-
----
-
-## Architecture
-
-### 1. Input Buffer and Tokenizer
-
-Characters arriving from the serial backend accumulate in a global ring buffer.  
-When the system is available, `shell::poll()` transfers characters from the ring buffer into the shell’s input buffer (`sh_line[]`). Once a command terminator is received, the tokenizer splits it into:
-
-- base command  
-- flags (optional)  
-- arguments (optional)
-
-Tokens are stored in `argv[]`.  
-Tokens remain stored in-place in the input buffer, with the tokenizer inserting `'\0'` to delimit substrings.
+- Just the shell core (no commands) uses ~5kB flash and ~230 bytes RAM.
+- Adding the ring buffer holds incoming data until the shell can process it; adds ~40B flash and `RING_BUFFER_SIZE` bytes RAM.
 
 ---
+
+## How it Works
+
+The shell is built around three main components:
+
+### 1. Line Buffer and Tokenizer
+
+- Incoming bytes are fed into `sh_poll()`.
+- when a newline ( `'\r'` or `'\n'` ) is detected, the shell:
+    - null-terminates the input line  
+    - tokenizes it into `argv[]` based on whitespace  
+    - calls `sh_execute()` with `argc` and `argv`
+
+`argv[0]` always holds the base command. `argv[1..n]` hold flags and arguments.
 
 ### 2. Command / Flag Lookup Tables
 
-Commands are parsed from `argv[0]` and compared against the static command lookup table.  
-Each entry contains:
+Commands live in static `shell_cmd_t` tables:
 
-- command name  
-- help description  
-- pointer to the command handler  
-- command ID  
-- pointer to an associated flag table (optional)
-
-Only a command’s `cmd_*` handler invokes its `f_*` flag handlers.  
-Arguments appear after flags in `argv[]` and may be interpreted as needed.
-
-Lookup is linear (O(N)) for minimal overhead.
-
----
-
-### 3. Command / Flag Handlers
-
-Each command implements a `cmd_*` handler.  
-Optional flags are implemented with `f_*` handler functions.
-
-A command handler:
-
-- validates arguments  
-- dispatches flags if present  
-- performs the command’s primary behavior  
-
-Any number of flags may be defined per command; however, **only one flag may be used at a time**.
-
-Flag handlers execute only the behavior associated with the flag. They are invoked exclusively by their command’s handler.
-
----
-
-### Buffering Model
-
-The shell uses two buffering layers:
-
-1. **Global ring buffer** – fed by the serial backend (typically the RX interrupt)  
-2. **Input buffer (`sh_line[]`)** – parsed and tokenized by the shell  
-
-`argv[0]` always contains the base command.  
-`argv[1..n]` contain flags and arguments.
-
----
-
-## Typical Usage
-
-Examples of supported command patterns:
-
-```
-help
-help -long
-help -c led
-
-print "hello world"
-
-debug -on
+```c
+static const shell_cmd_t user_cmds[] = {
+    { "led", "toggle onboard LED", cmd_led, NULL, .sub = { CMD_NO_FLAG, NOPARAM, false, 0} }
+};
 ```
 
-**Only one flag may be passed at a time.**
+System commands `help`, `dump`, `ver`, `mem`, and `peek` are defined in `sys_commands.c` and linked in when enabled via `shell_config.h`.
 
-### Adding a New Command
+Each command may have an associated block of flags starting at `flag_base`, with `sub.flag_count` indicating the number of flags that beong to that command. All flags may be defined in a single table, or split across multiple tables per command. The only requirement is that commands with multiple flags have their flags defined in contiguous entries.
 
-1. Write a `cmd_*` handler  
-2. Add a command entry in `shell::cmd[]`  
-3. (Optional) Create a flag table and `f_*` handlers  
+Flags are defined with `flag_t` entries:
 
----
+```c
+static const flag_t led_flags[] = {
+    { "-on", "turn LED on", "led", f_led_on, .sub = {true, OPT, 0} },
+    { "-off", "turn LED off", "led", f_led_off, .sub = {true, OPT, 0} }
+};
+```
+
+### 3. Handlers
+
+Command handlers have the signature:
+
+```c
+void cmd_x(shell_t* sh, const shell_cmd_t* self, const char* param, int argc, char** argv);
+```
+
+Flag handlers have the signature:
+
+```c
+void f_x(shell_t* sh, const shell_cmd_t* parent, const char* param, int argc, char** argv);
+```
+
+`sh_execute()`:
+- Looks up `argv[0]` in system + user command tables
+- Validates flags/paramaters accordign to `exe_mode_t` and `param_mode` settings
+- Dispatches to the appropriate handler(s)
 
 ## Integration
 
-A minimal integration example:
+### Feeding Input to the Shell
 
-```cpp
-USART serial_0;
-shell sh(&serial_0);
+There are two typical methods to feed characters into `sh_poll()`:
 
-while (1) {
-    sh.poll();  // process input and execute commands
+1. Call `sh_poll()` directly from your serial RX interrupt handler (ISR). This is the simplest method - it minimizes RAM usage and avoids an additional buffer. 
+
+```c
+ISR(USART_RX_vect) {
+    uint8_t c = UDR0;
+    sh_poll(&sh, c);
 }
 ```
+- **Pros**: Smallest footprint, simple
+- **Cons**: Command parsing and handlers will run in interrupt context; handlers should be fast and non-blocking
 
-The shell is transport-agnostic.  
-Any backend capable of providing characters to the shell will work.
+2. Use a ring buffer
 
-### Typical Backend Model
+For more complex systems, you can push bytes into a ring buffer in the ISR, and poll that buffer in your main loop or state machine with `sh_poll()`.
 
-In the included AVR example:
+```c
 
-- The USART RX ISR stores incoming bytes in the global ring buffer  
-- `shell::poll()` reads from the ring buffer and assembles the command in `sh_line[]`  
-- When a newline is detected, the command is tokenized and executed
+ISR(USART_RX_vect) {
+    uint8_t c = UDR0;
+    buf_push(&rx_buf, c);
+}
 
-To use the shell without a ring buffer, `poll()` must be modified to read from another backend.
+int main(void) {
+    while (1) {
+        uint8_t c;
+        if (buf_pop(&rx_buf, &c)) {
+            sh_poll(&sh, c);
+        }
+        //rest of loop...
+    }
+}
+```
+- **Pros**: ISR stays small, you decide when the shell processes input
+- **Cons**: Extra RAM for buffer
+
+Both input models will work identically from the shell's perspective. Choose the one that best fits your application's architecture and timing requirements.
 
 ### Backend Requirements
 
-- A function (ISR or polling function) that pushes incoming characters into the shell  
-- A serial driver providing at minimum:
+The shell core requires a `putchar`-style callback for output. This function should take a character and a user pointer (which can be `NULL` if not needed).
 
-  ```cpp
-  put_string(char*)
-  ```
+Additional `put_string` and `put_stringP` (`PROGMEM` version for AVR) can be used by the shell if provided, but they are not required. 
 
-  and optionally:
+Wrapping an existing serial driver is straightforward. Just implement the `putchar` function to call your driver's transmit function:
 
-  ```cpp
-  receive()
-  ```
-
-- A main loop that repeatedly calls `poll()`
-
----
-
-## Code Examples
-
-### Command ID Enum Entry
-
-```cpp
-typedef enum {
-    HELP, LED,
-    NONE, err, NUM_CMDS
-} command_id_t;
-```
-
-Insert new command IDs before `NONE`.  
-The last three values should always be `NONE`, `err`, and `NUM_CMDS`.
-
----
-
-### Command Table Entry
-
-```cpp
-const command_t shell::cmd[] = {
-    {"help", "Show list of supported commands", &shell::cmd_help, HELP, help_flags},
-    {"led",  "Toggle onboard LED", &shell::cmd_led, LED, nullptr},
-    {nullptr, nullptr, nullptr, err, nullptr}
-};
-```
-
-This table must be defined **exactly once** in `lut.cpp`.
-
----
-
-### Flag Table Entry
-
-```cpp
-const flag_t help_flags[] = {
-    { "-long", "Show command descriptions", &shell::f_help_long },
-    { "-c",    "Show flags for a command", &shell::f_help_c },
-    { nullptr, nullptr, nullptr }
-};
-```
-
-Flag tables should also be defined in `lut.cpp`.
-
----
-
-### Command Handler Example
-
-```cpp
-void shell::cmd_help(int argc, char **argv) {
-    if (argc == 1) {
-        puts_const("Available commands:\r\n");
-        for (int i = 0; cmd[i].name != nullptr; i++) {
-            puts_many(cmd[i].name, "\r\n", nullptr);
-        }
-    } else {
-        for (int i = 1; i < argc; i++) {
-            for (int j = 0; help_flags[j].name != nullptr; j++) {
-                if (strcmp(argv[i], help_flags[j].name) == 0) {
-                    (this->*(help_flags[j].exe))(argc, argv);
-                    return;
-                }
-            }
-        }
-    }
-}
-```
-
----
-
-### Flag Handler Example
-
-```cpp
-void shell::f_help_long(int argc, char **argv) {
-    puts_const("Full command descriptions:\r\n");
-    for (int i = 0; cmd[i].name != nullptr; i++) {
-        puts_many(cmd[i].name, " - ", cmd[i].description, "\r\n", nullptr);
-    }
-    puts_const("\r\nUse -c <command> to list flags for a specific command\r\n");
-}
-```
-
-
-
+--- 

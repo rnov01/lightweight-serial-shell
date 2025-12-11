@@ -12,6 +12,7 @@
 
 # Auto-generated size/memory reports
 memusage.txt
+build_info.h
 
 # Dependency files
 *.d
@@ -47,9 +48,10 @@ docs/
 # ============================
 # Doxygen Output (Optional)
 # ============================
-#docs/
-#html/
-latex/
+*/docs/
+*/html/
+*/latex/
+doxyfile
 #doxygen-output/
 
 # ============================

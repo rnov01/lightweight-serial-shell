@@ -3,7 +3,7 @@
 #define FIRMWARE_VER_NAME ROSTR("v1.0")
 
 //configure data sizes
-#define IN_BUFFER_SIZE 16
+#define LINE_BUFFER_SIZE 16
 #define MAX_ARGS 5
 #define MAX_FLAGS 4
 
@@ -13,7 +13,7 @@
     #define HELP_CMD    1
     #define DUMP_CMD    1
     #define VER_CMD     1
-    #define MEM_CMD     1
+    #define MEM_CMD     0
 #else
     #define HELP_CMD    0
     #define DUMP_CMD    0
