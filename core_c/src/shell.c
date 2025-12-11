@@ -1,5 +1,7 @@
 #include "shell.h"
 #include "shell_sys.h"
+#include "shell_config.h"
+#include "shell_platform.h"
 //#include "../include/descriptions.h"
 #include <stdint.h>
 #include <string.h>
@@ -28,6 +30,8 @@ void sh_init(shell_t* sh, const shell_cmd_t* user_cmds, char* input_buf, uint8_t
 
     sh->cmd = user_cmds;
     sh->cmd_count = cmd_count;
+
+    sh_puts_ro(sh, ROSTR(" ...shell active... "));
 }
 
 int sh_poll(shell_t* sh, uint8_t c) {
@@ -67,6 +71,9 @@ int sh_poll(shell_t* sh, uint8_t c) {
     return 3;
 }
 
+void sh_putc(shell_t* sh, char c) {
+    sh->putc(c, sh->io_user);
+}
 
 void sh_puts(shell_t* sh, const char* s) {
     if (sh->puts) {
@@ -106,10 +113,32 @@ void sh_printc(shell_t* sh, color_t color, const char* s) {
     sh_puts_ro(sh, C_);
 }
 
+void print_uint(shell_t* sh, uint16_t n) {
+    char buf[6];
+    uint8_t i = 0;
+
+    if(n==0) {sh_puts_ro(sh, ROSTR("0")); return;}
+    while (n>0 && i < sizeof(buf)-1) {
+        buf[i++] = '0' + (n%10);
+        n/=10;
+    }
+    while(i--) sh_putc(sh, buf[i]);
+}
+
+const char* get_error_string(err_t e) {
+    #if defined(__AVR__)
+        //const _err *p = &err_msg[(uint8_t)e]; 
+        //memcpy_P(&temp, &err_msg[(uint8_t)e], sizeof(_err));
+        return READ_RO_PTR(const char*, &err_msg[(uint8_t)e]);
+    #else
+        return err_msg[(uint8_t)e].description;
+    #endif
+}
+
 void error(shell_t* sh, err_t err, const char* detail) {
     sh_puts_ro(sh, CRED);
     sh_puts_ro(sh, ROSTR("Error >> "));
-    sh_puts(sh, err_msg[(int)err].description);
+    sh_puts_ro(sh, get_error_string(err));
     if(detail) {
         sh_puts_ro(sh, ROSTR(" : "));
         sh_puts(sh, detail);
@@ -118,13 +147,22 @@ void error(shell_t* sh, err_t err, const char* detail) {
     LINE
 }
 
-const _err err_msg[] RODATA =  {
-    {NONE,              ""},
-    {INVALID_CMD,       "invalid command"},
-    {UNKNOWN_FLAG,      "unknown flag"},
-    {MISSING_ARG,       "missing argument"},
-    {RUNTIME_FAILURE,   "runtime error"},
-    {INVALID_PARAM,     "invalid parameter"}
+//error strings 
+static const char err_none[]          RODATA = "";
+static const char err_invalid_cmd[]   RODATA = "invalid command";
+static const char err_unknown_flag[]  RODATA = "unknown flag";
+static const char err_missing_arg[]   RODATA = "missing argument";
+static const char err_runtime_err[]   RODATA = "runtime error";
+static const char err_invalid_param[] RODATA = "invalid parameter";
+
+//table of pointers to strings
+const char * const err_msg[] RODATA = {
+    err_none,
+    err_invalid_cmd,
+    err_unknown_flag,
+    err_missing_arg,
+    err_runtime_err,
+    err_invalid_param
 };
 
 static const shell_cmd_t* sh_find_cmd(shell_t* sh, const char *name) {
@@ -165,6 +203,16 @@ static err_t sh_parse_args(const shell_cmd_t* cmd, int argc, char**argv, sh_pars
             }
             out->flag_pos[out->flag_count++] = (uint8_t)i;
         } else {
+            if (i > 1) {
+                const char* prev = argv[i - 1];
+                if(prev && prev[0] == '-' && prev[1] != '\0') {
+                    const flag_t* prev_fl = sh_find_flag(cmd, prev);
+                    if (prev_fl && prev_fl->sub.param_mode != NOPARAM) {
+                        continue;
+                    }
+                }
+                
+            } 
             if (out->param_idx >= 0) {
                 if(err_arg) *err_arg = arg;
                 return INVALID_PARAM;
@@ -298,10 +346,10 @@ void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param,
 }
 
 const flag_t* sh_find_flag(const shell_cmd_t* cmd, const char* n) {
-    if (!cmd) return NULL;
-    const flag_t* const* flags = cmd->flags;
-    for(int i=0; i < cmd->flag_count && i < MAX_FLAGS; i++) {
-        const flag_t *fl = cmd->flags[i];
+    if (!cmd || !n || !cmd->flag_base) return NULL;
+
+    for(int i=0; i < cmd->sub.flag_count && i < MAX_FLAGS; i++) {
+        const flag_t *fl = &cmd->flag_base[i];
         if (!fl || !fl->name) continue;
         if (strcmp(n, fl->name) == 0) {
             return fl;
@@ -348,3 +396,77 @@ uint8_t sh_max_cmd_name_len(shell_t *sh)
 
     return max;
 }
+
+uint8_t total_flag_count(shell_t* sh) {
+    uint8_t total_flags = 0;
+    for (int i=0;i<sys_cmd_count;i++) {
+        total_flags += sys_cmds[i].sub.flag_count;
+    }
+    for (int k=0; k<sh->cmd_count; k++) {
+        total_flags += sh->cmd[k].sub.flag_count;
+    }
+    return total_flags;
+}
+
+#ifdef SYS_DEBUG
+bool shell_is_valid_debug_addr(uintptr_t addr)
+{
+    // If PERIPH_* not set, they’re both 0 so this check is a no-op
+    if (PERIPH_START != PERIPH_END) {
+        if (addr >= PERIPH_START && addr <= PERIPH_END)
+            return true;
+    }
+
+    if (SRAM_START != SRAM_END) {
+        if (addr >= SRAM_START && addr <= SRAM_END)
+            return true;
+    }
+
+    return false;
+}
+
+bool parse_uint(const char* s, uint32_t* out) {
+    uint32_t value = 0;
+    int base = 10;
+
+    if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+        base = 16;
+        s+= 2;
+    }
+
+    if(*s == '\0') return false;
+
+    while(*s) {
+        char c = *s++;
+        uint8_t d;
+
+        if (c >= '0' && c <= '9') {
+            d = (uint8_t)(c - '0');
+        } else if ( base == 16 && c>= 'a' && c <='f') {
+            d = (uint8_t)(c - 'a' + 10);
+        } else if ( base == 16 && c >= 'A' && c <= 'F') {
+            d = (uint8_t)(c - 'A'+ 10);
+        } else {
+            return false;
+        }
+        value = (value * base) + d;
+    }
+    *out = value;
+    return true;
+}
+
+void print_hex_digit(shell_t* sh, uint8_t d) {
+    char c = (d < 10) ? ('0' +d) : ('A' + (d-10));
+    sh_putc(sh, c);
+}
+
+
+void print_hex8(shell_t* sh, uint8_t n) {
+    uint8_t high = (n>>4) & 0x0F;
+    uint8_t low = n & 0x0F; 
+    //sh_puts_ro(sh, ROSTR("0x"));
+    print_hex_digit(sh, high);
+    print_hex_digit(sh, low);
+}
+
+#endif
