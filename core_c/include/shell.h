@@ -87,7 +87,8 @@ typedef enum exe_mode {
 typedef enum param_mode {
     NOPARAM,            /* no parameter allowed; parameter will result in error message */
     REQ,                /* required parameter; no parameter provided will result in error message */
-    OPT                 /* optional parameter */
+    OPT,                /* optional parameter */
+    MULTI               /* No named param, but allows multiple argv arguments */
 } cmd_param_t, flag_param_t;
 
 /* ===================================================================
@@ -101,13 +102,15 @@ typedef void(*flag_handler)(
     shell_t* sh, 
     const shell_cmd_t* parent,
     const char* param, 
-    int argc, 
+    uint8_t argc, 
     char **argv);
 
 struct flag {
     const char* name;           /* string that will be matched with cli args ex. "-v" */
     const char* description;    /* short description; used with "help" system command */
+    #if SH_FLAG_PARENT
     const char* parent;         /* name of parent command (optional) */
+    #endif
     flag_handler handler;       /* callback for flag; may be NULL */
     struct {
         bool in_progmem         : 1;    /* description in PROGMEM (AVR) */
@@ -127,7 +130,7 @@ typedef void(*cmd_handler)(
     shell_t* sh,
     const shell_cmd_t* self, 
     const char* param, 
-    int argc, 
+    uint8_t argc, 
     char **argv);
 
 struct shell_cmd {
@@ -170,9 +173,9 @@ typedef struct {
  * =================================================================== */
 struct shell {
     /* Output callbacks (user-provided) */
-    void (*putc)(char c, void* user);
-    void (*puts)(const char* s, void* user);        /* optional; may be NULL - shell will derive its own from putc() */
-    void (*puts_p)(const char* p, void* user);      /* optional for read-only (PROGMEM) strings */
+    void (*putc)(void* user, char c);
+    void (*puts)(void* user, const char* s);        /* optional; may be NULL - shell will derive its own from putc() */
+    void (*puts_p)(void* user, const char* p);      /* optional for read-only (PROGMEM) strings */
     void* io_user;                                  /* optional context pointer for object-based callback functions */
 
     /* Input buffer */
@@ -228,7 +231,7 @@ typedef enum color {
  * @param cmd_count Number of entries in user_cmds
  * */
 void                sh_init(shell_t* sh, const shell_cmd_t* user_cmds, char* input_buf, uint8_t buf_len, 
-                        char** argv, uint8_t max_argv, void (*putc)(char c, void* user), void* io_user, 
+                        char** argv, uint8_t max_argv, void (*putc)(void* user, char c), void* io_user, 
                         uint8_t cmd_count);
 /** 
  * @brief Feed one character into the shell state machine
@@ -246,20 +249,22 @@ void                sh_putc(shell_t* sh, char c);
 void                sh_puts(shell_t* sh, const char* s);
 void                sh_puts_ro(shell_t* sh, const char* p);
 void                sh_printc(shell_t* sh, color_t color, const char* s);
+void                sh_printc_ro(shell_t* sh, color_t color, const char* s_ro);
 
 /* Error helpers */
 const char*         get_error_string(err_t e);
 void                error(shell_t* sh, err_t err, const char* detail);
+void                error_ro(shell_t* sh, err_t err, const char* detail_ro);
 
 /* Command execution & parsing */
-void                sh_execute(shell_t* sh, int argc, char** argv);
-int                 tokenizer(char *buf, char **argv, int max_args);
+void                sh_execute(shell_t* sh, uint8_t argc, char** argv);
+int                 tokenizer(char *buf, char **argv, uint8_t max_args);
 
 /* Flag related helpers */
-void                sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, int argc, char** argv);
+void                sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv);
 const flag_t*       sh_find_flag(const shell_cmd_t* cmd, const char* n);
-bool                sh_has_flag(int argc, char **argv, const char* f);    //check if user input has flag argument
-void                sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const flag_t* flag, const char* fparam, int argc, char** argv);
+bool                sh_has_flag(uint8_t argc, char **argv, const char* f);    //check if user input has flag argument
+void                sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const flag_t* flag, const char* fparam, uint8_t argc, char** argv);
 
 /* Debug helpers */
 uint8_t             sh_max_cmd_name_len(shell_t *sh);
@@ -273,12 +278,12 @@ void                print_hex_digit(shell_t* sh, uint8_t d);
 void                print_hex8(shell_t* sh, uint8_t n);
 
 /* Line-drawing characters for flag tree in dump command */
-#if defined(__AVR__)
+#if defined(NULL)
     #define ls_mid_str ROSTR("\xE2\x94\x9C")
     #define ls_end_str ROSTR("\xE2\x94\x94")
 #else 
-    #define ls_mid_str "|"
-    #define ls_end_str "\\"
+    #define ls_mid_str ROSTR("|")
+    #define ls_end_str ROSTR("\\")
 #endif
 
 

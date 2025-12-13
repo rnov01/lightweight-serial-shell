@@ -8,7 +8,8 @@ The shell operates over any byte-oriented interface (typically USART) and provid
 
 Highlights:
 
-- **Low resource usage** - (`<10kB flash and ~330 bytes RAM on ATmega2560 for all core features and input buffering; can be reduced further`)
+- **Low resource usage** - (`<8.5kB flash and ~225 bytes RAM on ATmega2560 for all core features and input buffering; can be reduced further`)
+    - No dynamic memory allocation
 - **Portable C API** - Pure C core, hardware independent; plug in any serial backend
 - **Configurable commands and flags** - Easily extendable command/flag system
 - **Non-blocking behavior** - Simple integration into existing main loops or state machines
@@ -19,7 +20,7 @@ The shell core is hardware-neutral. You provide:
 - A buffer for incoming lines
 - Command / flag tables and handlers defining your shell commands
 
-This lightweight build includes 5 built-in commands:
+The shell includes 5 built-in commands:
 
 `help` - provides info about commands and flags
 `dump` - prints command/flag lookup tables
@@ -27,7 +28,7 @@ This lightweight build includes 5 built-in commands:
 `mem` - display shell memory settings
 `peek` - read a byte (or 2, or 4 with -16 and -32 flags) from a specified memory address
 
-These commands can be easily batch removed or individually toggled at compile-time to save space.
+These commands can be easily batch removed or individually toggled at compile-time to save space. `shell_config.h` is used to set build options. 
 
 ---
 
@@ -42,8 +43,10 @@ These commands can be easily batch removed or individually toggled at compile-ti
 #define MAX_ARGS            8       // max number of args (including command and flags)
 #define MAX_FLAGS           4       // max number of flags per command
 
-#define SYS_CORE                    // enable core system commands (optional)
+#define SYS_CORE                    // enable built-in system commands (help, dump, ver, mem, peek)
 ```
+
+### User Commands
 2. Define user commands (optional):
 
 If you have no user commands, you can pass `NULL` and `0` to `sh_init()` for the `user_cmds` and `cmd_count` parameters.
@@ -58,6 +61,7 @@ static const shell_cmd_t user_cmds[] = {
     { "led", "Toggle onboard LED", cmd_led, NULL, .sub = { CMD_NO_FLAG, NOPARAM, false, 0} }
 };
 ```
+### Configure Input
 
 3. Allocate an input buffer and initialize the shell:
 
@@ -91,10 +95,12 @@ int main(void) {
         if (c >= 0) {
             sh_poll(&sh, (uint8_t)c);  
         }
-        //rest of main loop...
+        //rest of loop...
     }
 }
 ```
+
+### Implement User Commmand Handler logic
 
 4. Example command handler:
 
@@ -104,13 +110,25 @@ static void cmd_led(shell_t* sh, const shell_cmd_t* self, const char* param, int
     sh_puts(sh, "LED toggled!\r\n");
 }
 ```
+
+### Build
+
 5. Build and Flash:
 
 - Makefile is provided for AVR-GCC and ARM GCC; modify as needed for your platform and target.
 
 ```sh
-make avrflash
-make stm32flash
+#ATmega2560
+make avr PLATFORM=avr BOARD=mega2560
+make flash PLATFORM=avr BOARD=mega2560
+#or
+make avr flash PLATFORM=avr BOARD=mega2560
+
+#ATmega328P
+make avr flash PLATFORM=avr BOARD=uno
+
+#STM32 F411RE
+make stm32 flash PLATFORM=stm32 BOARD=f411re
 ```
 
 
@@ -127,18 +145,19 @@ led
 ## Memory Breakdown
 
 *This is based on an ATmega2560 reference build with 5 system commands enabled and feeding `sh_poll()` directly in ISR (no buffering).*
+*The numbers below are approximate and will vary based on compiler and optimization settings. These are from avr-gcc with `-Os`.*
 
 |Command  | Flash (bytes) | RAM (bytes) |
 |---------|----------------|--------------|
-|help    |  1358          |   30          |
-|dump    |  1402          |   26          |
-|ver     |   418          |   30          |
-|mem     |   346          |   14          |
-|peek    |   846          |   50          |
+|help    |  1246          |   24          |
+|dump    |  1284          |   24          |
+|ver     |   432          |   14          |
+|mem     |   340          |   14          |
+|peek    |   866          |   32          |
 
-**Shell Core Total:** 8180 bytes flash, 291 bytes RAM
+**Shell Core + System Command Total:** 8334 bytes flash, 191 bytes RAM. This includes a minimal USART backend for testing.
 
-- Just the shell core (no commands) uses ~5kB flash and ~230 bytes RAM.
+- Just the shell core (no commands) uses ~4.2kB flash and ~95 bytes RAM.
 - Adding the ring buffer holds incoming data until the shell can process it; adds ~40B flash and `RING_BUFFER_SIZE` bytes RAM.
 
 ---
@@ -169,7 +188,7 @@ static const shell_cmd_t user_cmds[] = {
 
 System commands `help`, `dump`, `ver`, `mem`, and `peek` are defined in `sys_commands.c` and linked in when enabled via `shell_config.h`.
 
-Each command may have an associated block of flags starting at `flag_base`, with `sub.flag_count` indicating the number of flags that beong to that command. All flags may be defined in a single table, or split across multiple tables per command. The only requirement is that commands with multiple flags have their flags defined in contiguous entries.
+Each command may have an associated block of flags starting at `flag_base`, with `sub.flag_count` indicating the number of flags that belong to that command. All flags may be defined in a single table, or split across multiple tables per command. The only requirement is that, for any given command, its flags occupy a contiguous block in memory, and `flag_base` points to the first flag in that block.
 
 Flags are defined with `flag_t` entries:
 
@@ -185,18 +204,18 @@ static const flag_t led_flags[] = {
 Command handlers have the signature:
 
 ```c
-void cmd_x(shell_t* sh, const shell_cmd_t* self, const char* param, int argc, char** argv);
+void cmd_x(shell_t* sh, const shell_cmd_t* self, const char* param, uint8_t argc, char** argv);
 ```
 
 Flag handlers have the signature:
 
 ```c
-void f_x(shell_t* sh, const shell_cmd_t* parent, const char* param, int argc, char** argv);
+void f_x(shell_t* sh, const shell_cmd_t* parent, const char* param, uint8_t argc, char** argv);
 ```
 
 `sh_execute()`:
 - Looks up `argv[0]` in system + user command tables
-- Validates flags/paramaters accordign to `exe_mode_t` and `param_mode` settings
+- Validates flags/parameters according to `exe_mode_t` and `param_mode` settings
 - Dispatches to the appropriate handler(s)
 
 ## Integration
@@ -210,7 +229,8 @@ There are two typical methods to feed characters into `sh_poll()`:
 ```c
 ISR(USART_RX_vect) {
     uint8_t c = UDR0;
-    sh_poll(&sh, c);
+    sh_poll(&sh, c);    /*handlers should be short/non-blocking; consider ring-buffer model 
+                          if you want to run long commands outside of interrupt context */
 }
 ```
 - **Pros**: Smallest footprint, simple
@@ -249,5 +269,44 @@ The shell core requires a `putchar`-style callback for output. This function sho
 Additional `put_string` and `put_stringP` (`PROGMEM` version for AVR) can be used by the shell if provided, but they are not required. 
 
 Wrapping an existing serial driver is straightforward. Just implement the `putchar` function to call your driver's transmit function:
+
+```c
+static void usart0_putc(char c, void* user) {
+    (void)user;         //unused
+    usart_write(c);     //your USART driver here
+}
+```
+
+If you have object-based USART functions, like the AVR driver included in this repo, you can pass a pointer to the USART object as the `io_user` parameter in `sh_init()`, and cast it back in your `putchar` function.
+
+```c
+usart_t USART0 = {
+        .put_c = usart_putc,
+        .UDRn = &UDR0,
+        .UCSRnA = &UCSR0A,
+        .UCSRnB = &UCSR0B,
+        .UCSRnC = &UCSR0C,
+        .UBRRn = &UBRR0, 
+        .sub = {
+            .rxcie = true,
+            .txcie = false,
+            .rxen = true,
+            .txen = true
+        }
+    };
+
+    usart_init(&USART0, 19200, 8);
+
+    void putc_wrap(char c, void* user) {
+        usart_t* u = (usart_t*)user;
+        u->put_c(u, c);
+    }
+
+    static char line_buf[32];
+    static char* argv[8];
+  
+    sh_init(&sh, NULL, line_buf, 32, argv, 8, putc_wrap, &USART0, 0);
+
+```
 
 --- 
