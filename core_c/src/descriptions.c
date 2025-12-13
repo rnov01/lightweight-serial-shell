@@ -28,3 +28,10 @@ const char peek_d[] RODATA = "read peripheral register address. use with caution
     const char peek16_d[] RODATA = "read 2 bytes up from base addr";
     const char peek32_d[] RODATA = "read 4 bytes up from base addr";
 #endif
+
+#if WRITE_CMDS
+const char set_n[] = "setbit";
+const char set_d[] RODATA = "make <REG> <bit> 1";
+const char rst_n[] = "rstbit";
+const char rst_d[] RODATA = "make <REG> <bit> 0";
+#endif

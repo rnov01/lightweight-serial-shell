@@ -18,7 +18,7 @@
 #endif
 
 static inline void sh_read_cmd(const shell_cmd_t* src, shell_cmd_t* dst) {
-    #if defined(__AVR__)
+    #if (__SH_AVR_TINY_TABLES__)
         memcpy_P(dst, src, sizeof(shell_cmd_t));
     #else
         *dst = *src;
@@ -27,7 +27,7 @@ static inline void sh_read_cmd(const shell_cmd_t* src, shell_cmd_t* dst) {
 }
 
 static inline void sh_read_flag(const flag_t* src, flag_t* dst) {
-    #if defined(__AVR__)
+    #if (__SH_AVR_TINY_TABLES__)
         memcpy_P(dst, src, sizeof(flag_t));
     #else
         *dst = *src;

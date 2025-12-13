@@ -31,3 +31,10 @@ extern const char peek_d[] RODATA;
     extern const char peek32_d[] RODATA;
 
 #endif
+
+#if WRITE_CMDS
+extern const char set_n[];
+extern const char set_d[] RODATA;
+extern const char rst_n[];
+extern const char rst_d[] RODATA;
+#endif
