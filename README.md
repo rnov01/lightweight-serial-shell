@@ -1,4 +1,4 @@
-# Lightweight Embedded Serial Shell (C API)
+# Lightweight Embedded Serial Shell 
 
 ## Overview
 
@@ -8,25 +8,33 @@ The shell operates over any byte-oriented interface (typically USART) and provid
 
 Highlights:
 
-- **Low resource usage** - (`<8.5kB flash and ~225 bytes RAM on ATmega2560 for all core features and input buffering; can be reduced further`)
-    - No dynamic memory allocation
-- **Portable C API** - Pure C core, hardware independent; plug in any serial backend
-- **Configurable commands and flags** - Easily extendable command/flag system
-- **Non-blocking behavior** - Simple integration into existing main loops or state machines
+- **Low resource usage** 
+<8kB flash and ~200B RAM on ATmega2560 with all core features enabled
+No dynamic memory allocation
+- **Portable pure-C core** 
+No hardware assumptions; easy to configure with different serial backends
+- **Configurable commands and flags** 
+Easily extend shell capabilities with user-defined commands and flags
+- **Non-blocking behavior** 
+Can be used in interrupt context or polled periodically from state machines, main loops, etc.
 
-The shell core is hardware-neutral. You provide:
+The shell itself is hardware-neutral. You provide:
 
-- A `putchar`-style callback for output
-- A buffer for incoming lines
+- A `putchar`-style function tied to your serial output
+- An input buffer for incoming commands
 - Command / flag tables and handlers defining your shell commands
+- (Optional) platform-specific register access callbacks for system commands
 
-The shell includes 5 built-in commands:
-
-`help` - provides info about commands and flags
-`dump` - prints command/flag lookup tables
-`ver` - show firmware version and build info
-`mem` - display shell memory settings
-`peek` - read a byte (or 2, or 4 with -16 and -32 flags) from a specified memory address
+Built in System Commands:
+|||                         
+|----------------|-----------------------|
+|`help` | lists available commands and descriptions|
+|`dump` | prints detailed command/flag information (execution mode, parameter mode, etc.)|
+|`ver` | firmware version and build info|
+|`mem` | shell memory settings|
+|`peek` | read a byte from a register (supports larger widths with -16 and -32 flags) |
+|`setbit` | set a  bit in a register (requires backend implementation)|
+|`rstbit` | clear a bit in a register (requires backend implementation)|
 
 These commands can be easily batch removed or individually toggled at compile-time to save space. `shell_config.h` is used to set build options. 
 
@@ -39,11 +47,12 @@ These commands can be easily batch removed or individually toggled at compile-ti
 1. In `shell_config.h`, set basic limits and enable built-in commands as needed:
 
 ```c
-#define LINE_BUFFER_SIZE    32      // max input line length
-#define MAX_ARGS            8       // max number of args (including command and flags)
+#define LINE_BUFFER_SIZE    32      // max input line length (size for largest expected command + args + flags + terminator)
+#define MAX_ARGS            8       // max number of args per command(including command and flags)
 #define MAX_FLAGS           4       // max number of flags per command
 
-#define SYS_CORE                    // enable built-in system commands (help, dump, ver, mem, peek)
+#define SYS_CORE                    // enable built-in system commands (help, dump, ver, mem)
+#define SYS_DEBUG                   // enable register access commands (peek, setbit, rstbit)    
 ```
 
 ### User Commands
@@ -61,6 +70,18 @@ static const shell_cmd_t user_cmds[] = {
     { "led", "Toggle onboard LED", cmd_led, NULL, .sub = { CMD_NO_FLAG, NOPARAM, false, 0} }
 };
 ```
+
+Three execution modes are supported for commands:
+- `CMD_NO_FLAG` - command does not accept flags and an error is returned if any are provided
+- Two different handling methods for commands with flags:
+    - `CMD_THEN_FLAG` - base command is executed first, the the flag handler is dispatched
+    - `FLAG_ONLY` - the base command is not executed; only the flag handlers are dispatched
+
+Four parameter modes are supported for commands and three for flags:
+- `NOPARAM` - no parameter is expected; an error is returned if one is provided
+- `REQ` - a parameter is required; an error is returned if none is provided
+- `OPT` - parameter is optional (no error checking)
+- `MULTI` - pass through that bypasses parameter validation; the handler is responsible for parsing parameters from `argv[]` **note** this     mode is not supported for flags
 ### Configure Input
 
 3. Allocate an input buffer and initialize the shell:
@@ -76,26 +97,28 @@ static shell_t sh;
 
 static void my_putc(char c, void* user) {
     (void)user;
-    uart_write_blocking(c);  // your UART driver here
+    uart_write(c);          //your serial write function here
+}
+
+/* Implement this based on your platform and desired serial interface */
+UART_RX_ISR() {
+    uint8_t byte = uart_read();
+    sh_poll(&sh, byte);
 }
 
 int main(void) {
     sh_init(&sh,    
-            user_cmds, //or NULL if no user commands
+            user_cmds,      //or NULL if no user commands
             in_buffer, 
             LINE_BUFFER_SIZE, 
             argv, 
             MAX_ARGS,
             my_putc, 
-            NULL,       //io_user = NULL for simple backends
+            NULL,           //io_user = NULL for simple backends
             sizeof(user_cmds)/sizeof(user_cmds[0]));
 
     while (1) {
-        int c = uart_read_nonblocking(); // returns -1 if no data
-        if (c >= 0) {
-            sh_poll(&sh, (uint8_t)c);  
-        }
-        //rest of loop...
+        
     }
 }
 ```
@@ -149,15 +172,15 @@ led
 
 |Command  | Flash (bytes) | RAM (bytes) |
 |---------|----------------|--------------|
-|help    |  1246          |   24          |
-|dump    |  1284          |   24          |
-|ver     |   432          |   14          |
-|mem     |   340          |   14          |
-|peek    |   866          |   32          |
+|help    |  1224          |   14          |
+|dump    |  1826          |   14          |
+|ver     |   422          |   4           |
+|mem     |   574          |   4           |
+|peek    |   1150         |   22          |
 
-**Shell Core + System Command Total:** 8334 bytes flash, 191 bytes RAM. This includes a minimal USART backend for testing.
+**Shell Core + System Command Total:** 7768 bytes flash, 175 bytes RAM. This includes a minimal USART backend for testing.
 
-- Just the shell core (no commands) uses ~4.2kB flash and ~95 bytes RAM.
+- Just the shell core (no commands) uses ~2.9kB flash and ~90 bytes RAM.
 - Adding the ring buffer holds incoming data until the shell can process it; adds ~40B flash and `RING_BUFFER_SIZE` bytes RAM.
 
 ---
@@ -307,6 +330,104 @@ usart_t USART0 = {
   
     sh_init(&sh, NULL, line_buf, 32, argv, 8, putc_wrap, &USART0, 0);
 
+```
+
+### Porting Requirements for Register Access (optional feature)
+
+The shell includes optional system commands that allow reading and writing hardware registers. Platforms may implement all, none of some of these features.
+
+The system read command, `peek` is enabled by default with numeric (hex) address access.
+To enable register write system commands (`setbit` and `rstbit`) on your platform, you must provide a small set of macros and backend functions in your platform header.
+
+If no register access features are provided:
+-  `peek` will only accept numeric addresses and will return an error for all addresses unless safe ranges are defined
+- Write commands (`setbit`, `rstbit`) will always return an error unless explicitly disabled in `shell_config.h`. 
+
+#### 1. Register lookup (optional - enables name based access)
+
+The shell supports two ways to interpret register arguments:
+- Numeric addresses (always supported)
+```c
+peek 0xC0
+>> 0x00        
+```
+- Symbolic register names (requires register map and lookup functions)
+```c
+peek PORTB 
+>> 0x80
+setbit DDRC 3
+>> ok...     
+```
+To enable symbolic register access, you must provide two lookup functions and define two macros in your platform header:
+
+
+```c
+#define SH_FIND_REG(name)   my_find_reg(name)   
+#define SH_GET_ADDR(reg)    my_get_addr(reg)
+```
+
+Signatures:
+```c
+int8_t my_find_reg(const char* name); 
+    //returns 
+        //platform-defined register ID
+        //-1 if not found
+volatile uint8_t* my_get_addr(int8_t reg); 
+    //returns 
+        //pointer to the register address (used for peek/setbit/rstbit)
+```
+
+- The return value from `my_find_reg()` does not need to be and index into any particular structure; it is an opaque ID that `my_get_addr()` needs to understand. You may use an enum, a simple integer index, or any other scheme that fits your platform.
+- A register table is not required; named access only requires a way to find a register by name and get its address.
+    - `my_find_reg()` must recognize reg name string and return and ID
+    - `my_get_addr()` must return a valid address pointer for that ID
+
+If these macros are not defined, `peek <REGNAME>` is disabled and only numeric addresses are accepted. `setbit` and `rstbit` commands may still work depending on your backend implementation.
+
+Your implementation is responsible for ensuring returned pointers fall within the valid address space for your platform.
+
+**Note:** Defining a named register lookup enables further restriction of write commands (beyond the safe address ranges described below). Write commands used with named registers will only succeed if the name exists in the register map and the specified bit is valid for that register (based on a mask you define in your register map). Numeric addresses are *only* validated against safe address ranges.
+
+By limiting the defined registers in the register map, you can prevent accidental writes to sensitive registers.
+
+
+#### 2. Safe address ranges (optional, but recommended)
+
+The shell prevents invalid memory accesses by restricting `peek`, `setbit` and `rstbit` to a set of allowed address ranges. You must define these ranges in your platform header as an array of `safe_addr_t` structs:
+
+```c
+#define SH_ALLOWED_ADDRESS_RANGES \
+    (safe_addr_t[]){{0x20u, 0xD6u}, {0x100u, 0x1FFu}}
+```
+
+- You may define one or more allowed ranges.
+- These restrictions are imposed on ***both*** numeric and named register accesses for read and write commands.
+- If you do not define `SH_ALLOWED_ADDRESS_RANGES`, register access commands will reject all addresses unless the feature is disabled in `shell_config.h`.
+
+
+
+#### 3. Bit write support (optional)
+
+Provide functions to set and clear bits and define:
+```c
+#define SH_SETBIT(reg, bit)    my_setbit(reg, bit)
+#define SH_RSTBIT(reg, bit)    my_rstbit(reg, bit)
+```
+The backend implementations expect the following signatures:
+```c
+bool my_setbit(const char* regname, uint8_t bit);
+bool my_rstbit(const char* regname, uint8_t bit);
+```
+
+- If these macros are not defined, write commands (`setbit`, `rstbit`) will return errors unless explicitly disabled in `shell_config.h`.
+- The backend should perform any necessary validation (e.g. bit number in range, register writable, etc) and return `true` on success, `false` on failure.
+
+#### Notes
+
+The shell never includes platform headers directly. Instead, it relies on the build system to define `SH_PLATFORM_HEADER` and `SH_REGMAP_H` macros to point to the appropriate files for your platform. Your makefile or build system must ensure the correct platform header is included during compilation.
+Example:
+```make
+CFLAGS += -include platforms/atmega2560/platform.h 
 ```
 
 --- 

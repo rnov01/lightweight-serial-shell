@@ -1,14 +1,21 @@
 #include "shell.h"
+#include "shell_platform.h"
+#include "str_helpers.h"
 #include "shell_sys.h"
 #include "shell_config.h"
 #include "hw_interface.h"
-#include "../include/descriptions.h"
+#include "descriptions.h"
 #include <string.h>
 #if WRITE_CMDS
 #include <stdlib.h>
 #endif
-#if TINY_REGMAP_EN
-#include "../../../ATmega2560_drivers/include/tiny_reg_map_2560.h"
+
+/* Adjust include path if you have platform-specific register map table */
+/*#if TINY_REGMAP_EN
+#include SH_REGMAP_H
+#endif*/
+#ifndef BUILD_TARGET
+#define BUILD_TARGET "Unknown"
 #endif
 
 #if HELP_CMD
@@ -32,7 +39,6 @@ static void cmd_setbit(shell_t* sh, const shell_cmd_t* self, const char* param, 
 static void cmd_rstbit(shell_t* sh, const shell_cmd_t* self, const char* param, uint8_t argc, char** argv);
 #endif
 
-
 /* shared description helpers */
 #if defined(SYS_CORE)
 static const char s_cmds[] RODATA   = "commands: ";
@@ -41,6 +47,7 @@ static const char s_param[] RODATA  = "| param=";
 static const char s_none[] RODATA   = "none";
 static const char s_opt[] RODATA    = "opt ";
 static const char s_req[] RODATA    = "req ";
+static const char s_multi[] RODATA = "mult";
 static const char s_arr[] RODATA    = " >> ";
 #endif
 
@@ -140,6 +147,47 @@ const uint8_t sys_cmd_count = (uint8_t)(sizeof(sys_cmds) / sizeof(sys_cmds[0]));
     const shell_cmd_t sys_cmds[] = {0};
     const uint8_t sys_cmd_count = 0;
 #endif
+
+/* Private Helpers */
+
+static uint8_t sh_max_cmd_name_len(shell_t *sh)
+{
+    uint8_t max = 0;
+
+    /* system commands */
+    for (uint8_t i = 0; i < sys_cmd_count; i++) {
+        const shell_cmd_t *c = &sys_cmds[i];
+        if (!c->name) continue;
+
+        uint8_t len = (uint8_t)strlen(c->name);
+        if (len > max) max = len;
+    }
+
+    /* user commands */
+    for (uint8_t i = 0; i < sh->cmd_count; i++) {
+        const shell_cmd_t *c = &sh->cmd[i];
+        if (!c->name) continue;
+
+        uint8_t len = (uint8_t)strlen(c->name);
+        if (len > max) max = len;
+    }
+
+    return max;
+}
+
+static uint8_t total_flag_count(shell_t* sh) {
+    uint8_t total_flags = 0;
+    for (uint8_t i=0;i<sys_cmd_count;i++) {
+        total_flags += sys_cmds[i].sub.flag_count;
+    }
+    for (uint8_t k=0; k<sh->cmd_count; k++) {
+        total_flags += sh->cmd[k].sub.flag_count;
+    }
+    return total_flags;
+}
+
+/* System handler definitions */
+
 #if HELP_CMD
 
 void f_help_c(shell_t* sh, const shell_cmd_t* parent, const char* param, uint8_t argc, char **argv) {
@@ -246,13 +294,14 @@ static uint8_t dump_cmd_range(shell_t *sh, const shell_cmd_t *cmds, uint8_t coun
             case NOPARAM: sh_puts_ro(sh, s_none); break;
             case OPT:     sh_puts_ro(sh, s_opt); break;
             case REQ:     sh_puts_ro(sh, s_req); break;
+            case MULTI:   sh_puts_ro(sh, s_multi); break;
         }
         sh_puts_ro(sh, ROSTR("  | flags=")); print_uint(sh, c->sub.flag_count); 
         sh_puts_ro(sh, ROSTR("  | exe="));
         switch (c->sub.flag_mode) {
                 case CMD_NO_FLAG: sh_puts_ro(sh, ROSTR("b-")); break;
                 case CMD_THEN_FLAG: sh_puts_ro(sh, ROSTR("bf")); break;
-                case FLAG_ONLY: sh_puts_ro(sh, ROSTR("-f"));} LINE
+                case FLAG_ONLY: sh_puts_ro(sh, ROSTR("-f")); break;} LINE
 
         // flags
         for (uint8_t j = 0; j < c->sub.flag_count; j++) {
@@ -263,9 +312,10 @@ static uint8_t dump_cmd_range(shell_t *sh, const shell_cmd_t *cmds, uint8_t coun
             for(uint8_t k=strlen(fl->name);k<max_name+1;k++) { SPACE } sh_puts_ro(sh, ROSTR("|"));
             for (uint8_t k=0; k<7;k++) { SPACE } sh_puts_ro(sh, s_param); 
                 switch (fl->sub.param_mode) {
-                    case NONE: sh_puts_ro(sh, s_none); break;
-                    case OPT: sh_puts_ro(sh, s_opt); break;
-                    case REQ: sh_puts_ro(sh, s_req);} 
+                    case NONE:  sh_puts_ro(sh, s_none); break;
+                    case OPT:   sh_puts_ro(sh, s_opt); break;
+                    case REQ:   sh_puts_ro(sh, s_req); break;
+                    case MULTI: sh_puts_ro(sh, s_multi); break;} 
                 for(uint8_t k=0;k<2;k++) { SPACE } sh_puts_ro(sh, ROSTR("|"));
                 if(!verbose) LINE
                 else {
@@ -355,25 +405,32 @@ static void cmd_peek(shell_t* sh, const shell_cmd_t* self, const char* param, ui
         width = 2;
     }
 
-
+    volatile uint8_t* addr_ptr = NULL;
     uint32_t addr32;
     /* Numeric parse */
-    if (!parse_uint(argv[1], &addr32)) {
+    if (parse_uint(argv[1], &addr32)) {
+        addr_ptr = (volatile uint8_t*)(uintptr_t)addr32;
+    } 
     /* Fallback reg name may be present */
-    #if TINY_REGMAP_EN
-        uint8_t id = find_reg(argv[1]);
+    #if defined(SH_REGMAP_H)
+    else {
+        int8_t id = SH_FIND_REG(argv[1]);
         if (id>=0) {
-            addr32 = get_addr(id);
-        } else
-    #endif
-        {
+            addr_ptr = SH_REG_ADDR(id);
+        } else {
+            error(sh, INVALID_PARAM, NULL);
+            return;
+        }
+    }
+    #else
+        else {
         error(sh, INVALID_PARAM, NULL);
         return;
         }
-    }
-    uintptr_t addr = (uintptr_t)addr32;
+    #endif
+    //uintptr_t addr = (uintptr_t)addr32;
     for (uint8_t i=0; i<width; ++i) {
-        if (!shell_is_valid_debug_addr(addr + i)) {
+        if (!SH_ADDR_OK((uintptr_t)(addr_ptr + i))) {
         error(sh, INVALID_PARAM, "addr oor");
         return;
         }
@@ -383,7 +440,8 @@ static void cmd_peek(shell_t* sh, const shell_cmd_t* self, const char* param, ui
     
     
     for (uint8_t i=0; i<width; ++i) {
-        uint8_t v = *(volatile uint8_t*)(addr+i);
+        //uint8_t v = *(volatile uint8_t*)(addr+i);
+        uint8_t v = ((volatile uint8_t*)addr_ptr)[i];
         sh_puts_ro(sh, ROSTR(" 0x"));
         print_hex8(sh, v);
     }
@@ -403,6 +461,11 @@ static void cmd_peek(shell_t* sh, const shell_cmd_t* self, const char* param, ui
 
         const char *reg = argv[1];
         uint8_t bit = (uint8_t)atoi(argv[2]);
+        /*uint8_t bit;
+        if(!sh_parse_u8(argv[2], &bit)) {
+            error_ro(sh, INVALID_PARAM, NULL);
+            return;
+        }*/
 
         if (!hw_setbit(reg, bit)) {
             error_ro(sh, INVALID_PARAM, NULL);
@@ -422,7 +485,12 @@ static void cmd_peek(shell_t* sh, const shell_cmd_t* self, const char* param, ui
 
         const char *reg = argv[1];
         uint8_t bit = (uint8_t)atoi(argv[2]);
-
+       /*uint8_t bit;
+        if(!sh_parse_u8(argv[2], &bit)) {
+            error_ro(sh, INVALID_PARAM, NULL);
+            return;
+        }*/
+       
         if (!hw_rstbit(reg, bit)) {
             error_ro(sh, INVALID_PARAM, NULL);
             return;

@@ -257,25 +257,38 @@ void                error(shell_t* sh, err_t err, const char* detail);
 void                error_ro(shell_t* sh, err_t err, const char* detail_ro);
 
 /* Command execution & parsing */
-void                sh_execute(shell_t* sh, uint8_t argc, char** argv);
-int                 tokenizer(char *buf, char **argv, uint8_t max_args);
+
 
 /* Flag related helpers */
-void                sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv);
-const flag_t*       sh_find_flag(const shell_cmd_t* cmd, const char* n);
 bool                sh_has_flag(uint8_t argc, char **argv, const char* f);    //check if user input has flag argument
-void                sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const flag_t* flag, const char* fparam, uint8_t argc, char** argv);
+
 
 /* Debug helpers */
-uint8_t             sh_max_cmd_name_len(shell_t *sh);
-uint8_t             total_flag_count(shell_t* sh);
+
 
 /* Optional debug helpers used for register-reading (peek) */
-bool                shell_is_valid_debug_addr(uintptr_t addr);
+bool                is_valid_addr(uintptr_t addr);
 void                print_uint(shell_t* sh, uint16_t n); 
 bool                parse_uint(const char* s, uint32_t* out);   //parse hex
 void                print_hex_digit(shell_t* sh, uint8_t d);
 void                print_hex8(shell_t* sh, uint8_t n);
+
+static inline void sh_read_cmd(const shell_cmd_t* src, shell_cmd_t* dst) {
+    #if (__SH_AVR_TINY_TABLES__)
+        memcpy_P(dst, src, sizeof(shell_cmd_t));
+    #else
+        *dst = *src;
+    
+    #endif
+}
+
+static inline void sh_read_flag(const flag_t* src, flag_t* dst) {
+    #if (__SH_AVR_TINY_TABLES__)
+        memcpy_P(dst, src, sizeof(flag_t));
+    #else
+        *dst = *src;
+    #endif
+}
 
 /* Line-drawing characters for flag tree in dump command */
 #if defined(NULL)

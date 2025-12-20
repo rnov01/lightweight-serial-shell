@@ -14,6 +14,9 @@
 memusage.txt
 build_info.h
 
+#local flash settings
+local.mk
+
 # Dependency files
 *.d
 

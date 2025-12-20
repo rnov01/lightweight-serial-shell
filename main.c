@@ -1,21 +1,20 @@
 
-#include "core_c/include/shell.h"
+#include "core_c/src/shell.h"
 #include "ring_buf.h"
-#include "core_c/include/shell_sys.h"
+#include "core_c/src/shell_sys.h"
 #include "../usart_hal/c/include/avr_usart.h"
 
-//#include "legacy_cpp/include/ring_buffer.h"
 #include <stdint.h>
 #include <util/delay.h>
-#include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <avr/io.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+
 static shell_t sh;
-//static usart_t USART0;
 ringbuf_t GLOBAL_BUFFER = {{0}, 0, 0};
+
 //grab usart bytes and store them in buffer
 #if defined(__AVR_ATmega2560__)
 ISR(USART0_RX_vect) {
@@ -82,7 +81,7 @@ int main() {
     while (1) {
         uint8_t c;
         if (buf_pop(&GLOBAL_BUFFER, &c)) {
-            sh_poll(&sh, c);
+           sh_poll(&sh, c);
         }
         
     

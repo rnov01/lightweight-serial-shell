@@ -1,13 +1,20 @@
 #include "shell.h"
+#include "str_helpers.h"
 #include "shell_sys.h"
 #include "shell_config.h"
 #include "shell_platform.h"
-//#include "../include/descriptions.h"
 #include <stdint.h>
 #include <string.h>
 
 extern const shell_cmd_t sys_cmds[];
 extern const uint8_t sys_cmd_count;
+
+/* Forward Declarations */
+static void sh_execute(shell_t* sh, uint8_t argc, char** argv);
+static int tokenizer(char* buf, char** argv, uint8_t max_args);
+static const flag_t* sh_find_flag(const shell_cmd_t* cmd, const char* n);
+static void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv);
+static void sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const flag_t* flag, const char* fparam, uint8_t argc, char** argv);
 
 void sh_init(shell_t* sh, const shell_cmd_t* user_cmds, char* input_buf, uint8_t buf_len, 
     char** argv, uint8_t max_argv, void (*putc)(void* user, char c), void* io_user, uint8_t cmd_count) {
@@ -168,7 +175,6 @@ void error_ro(shell_t* sh, err_t err, const char* detail_ro) {
     LINE
 }
 
-
 //error strings 
 static const char err_none[]          RODATA = "";
 static const char err_invalid_cmd[]   RODATA = "invalid command";
@@ -186,6 +192,9 @@ const char * const err_msg[] RODATA = {
     err_runtime_err,
     err_invalid_param
 };
+
+
+
 
 static const shell_cmd_t* sh_find_cmd(shell_t* sh, const char *name) {
     if (!sh ||!name) return NULL;
@@ -268,7 +277,7 @@ static err_t sh_parse_args(const shell_cmd_t* cmd, uint8_t argc, char**argv, sh_
     return NONE;
 }
 
-void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
+static void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
     if(!sh || argc <= 0 || !argv[0]) return;
 
     const shell_cmd_t *cmd = sh_find_cmd(sh, argv[0]);
@@ -358,7 +367,7 @@ void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
     }
 }
 
-int tokenizer(char *buf, char **argv, uint8_t max_args) {
+/*int tokenizer(char *buf, char **argv, uint8_t max_args) {
     uint8_t argc = 0;
     char *token = strtok(buf, " ");
 
@@ -367,13 +376,28 @@ int tokenizer(char *buf, char **argv, uint8_t max_args) {
         token = strtok(NULL, " ");
     }
     return argc;
+}*/
+
+static int tokenizer(char* buf, char** argv, uint8_t max_args) {
+    uint8_t argc = 0;
+    uint8_t i = 0;
+    while(buf[i] && argc < max_args) {
+        while(buf[i] == ' ') i++;
+        if(!buf[i]) break;
+
+        argv[argc++] = &buf[i];
+
+        while(buf[i] && buf[i] != ' ') i++;
+        if (buf[i]) buf[i++] = '\0';
+    }
+    return argc;
 }
 
-void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv) {
+static void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv) {
     cmd->handler(sh, cmd, param, argc, argv);
 }
 
-const flag_t* sh_find_flag(const shell_cmd_t* cmd, const char* n) {
+static const flag_t* sh_find_flag(const shell_cmd_t* cmd, const char* n) {
     if (!cmd || !n || !cmd->flag_base) return NULL;
 
     for(uint8_t i=0; i < cmd->sub.flag_count && i < MAX_FLAGS; i++) {
@@ -394,61 +418,30 @@ bool sh_has_flag(uint8_t argc, char **argv, const char* f) {
     }
     return false;
 }
-void sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const flag_t* flag, const char* fparam, uint8_t argc, char** argv) {
+static void sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const flag_t* flag, const char* fparam, uint8_t argc, char** argv) {
     if (!flag || !flag->handler) return;
     flag->handler(sh, parent, fparam, argc, argv);
 }
 
-
-uint8_t sh_max_cmd_name_len(shell_t *sh)
-{
-    uint8_t max = 0;
-
-    // system commands
-    for (uint8_t i = 0; i < sys_cmd_count; i++) {
-        const shell_cmd_t *c = &sys_cmds[i];
-        if (!c->name) continue;
-
-        uint8_t len = (uint8_t)strlen(c->name);
-        if (len > max) max = len;
-    }
-
-    // user commands
-    for (uint8_t i = 0; i < sh->cmd_count; i++) {
-        const shell_cmd_t *c = &sh->cmd[i];
-        if (!c->name) continue;
-
-        uint8_t len = (uint8_t)strlen(c->name);
-        if (len > max) max = len;
-    }
-
-    return max;
-}
-
-uint8_t total_flag_count(shell_t* sh) {
-    uint8_t total_flags = 0;
-    for (uint8_t i=0;i<sys_cmd_count;i++) {
-        total_flags += sys_cmds[i].sub.flag_count;
-    }
-    for (uint8_t k=0; k<sh->cmd_count; k++) {
-        total_flags += sh->cmd[k].sub.flag_count;
-    }
-    return total_flags;
-}
-
 #ifdef SYS_DEBUG
-bool shell_is_valid_debug_addr(uintptr_t addr) {
-    if (PERIPH_START != PERIPH_END) {
-        if (addr - PERIPH_START <= (uintptr_t)(PERIPH_END - PERIPH_START))
+bool is_valid_addr(uintptr_t addr) {
+#if SH_PEEK_REQ_SAFE_RANGES
+    const safe_addr_t *ranges = SH_ADDR_RANGES;
+    size_t count = SH_ADDR_RANGE_COUNT;
+
+    if (!ranges || count == 0)
+        return false;
+
+    for (size_t i = 0; i < count; i++)
+    {
+        if (addr >= ranges[i].start && addr <= ranges[i].end)
             return true;
     }
-
-    if (SRAM_START != SRAM_END) {
-        if (addr - SRAM_START <= (uintptr_t)(SRAM_END - SRAM_START)) 
-            return true;
-    }
-
     return false;
+#else
+    (void)addr;
+    return true;
+#endif
 }
 
 bool parse_uint(const char* s, uint32_t* out) {
@@ -486,7 +479,6 @@ void print_hex_digit(shell_t* sh, uint8_t d) {
     sh_putc(sh, c);
 }
 
-
 void print_hex8(shell_t* sh, uint8_t n) {
     uint8_t high = (n>>4) & 0x0F;
     uint8_t low = n & 0x0F; 
@@ -494,5 +486,4 @@ void print_hex8(shell_t* sh, uint8_t n) {
     print_hex_digit(sh, high);
     print_hex_digit(sh, low);
 }
-
 #endif
