@@ -1,5 +1,5 @@
 # ============================================================
-# Project config
+# config
 # ============================================================
 
 PROJECT        := lightweight-serial-shell-c
@@ -12,14 +12,14 @@ BUILD_INFO     := $(INC_DIR)/build_info.h
 BUILD_DIR      := build
 
 #external drivers
-HDIR		   := ../hardware_drivers
+HDIR		   := ../../libs/hardware_drivers
 
 #default host (pc)
 PLATFORM ?= host
 BOARD    ?= arduino_mega_atmega2560
 
 # ============================================================
-# Source files
+# source files
 # ============================================================
 
 CORE_SRCS  := $(wildcard $(SRC_DIR)/*.c) $(wildcard core_c/src/helpers/*.c)
@@ -31,7 +31,7 @@ SRCS       := $(CORE_SRCS) $(MAIN_SRCS)
 $(shell mkdir -p $(BUILD_DIR) >/dev/null 2>&1)
 
 # ============================================================
-# Auto-generated build info header
+# generate build info header
 # ============================================================
 
 $(BUILD_INFO):
@@ -89,7 +89,11 @@ else
 $(error Unknown PLATFORM '$(PLATFORM)'. Use PLATFORM=host or PLATFORM=avr)
 endif
 
-OBJS       := $(SRCS:.c=.o)
+OBJDIR		:= $(BUILD_DIR)/obj
+#OBJS       	:= $(SRCS:.c=.o)
+OBJS 		:= $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+
+$(shell mkdir -p $(sort $(dir $(OBJS))) >/dev/null 2>&1)
 
 # Make sure everyone sees BUILD_TARGET as the same as $(TARGET)
 CDEFS += -include build_info.h
@@ -125,9 +129,11 @@ else
 endif
 
 # Compile
-%.o: %.c $(BUILD_INFO)
+#%.o: %.c $(BUILD_INFO)
+#	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJDIR)/%.o: %.c $(BUILD_INFO)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
-
 # ============================================================
 # Flash (AVR only)
 # ============================================================
@@ -156,4 +162,5 @@ size:
 	$(SIZE) $(TARGET) || true
 
 clean:
-	rm -f $(OBJS) $(TARGET) $(BUILD_INFO) $(BUILD_DIR)/*.hex build_info.h
+#	rm -f $(OBJS) $(TARGET) $(BUILD_INFO) $(BUILD_DIR)/*.hex build_info.h
+	rm -rf $(BUILD_DIR) $(BUILD_INFO)
