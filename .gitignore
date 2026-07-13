@@ -1,6 +1,4 @@
-# ============================
 # Build Artifacts
-# ============================
 *.o
 *.elf
 *.hex
@@ -10,76 +8,21 @@
 *.map
 *.srec
 
-# Auto-generated size/memory reports
+# Auto-generated reports
 memusage.txt
 build_info.h
 
-#local flash settings
+#local build system files
 local.mk
+makefile
+main.c
+main.cpp
+project.mk
 
-# Dependency files
-*.d
-
-# ============================
-# Build Directories
-# ============================
+# build dirs
 build/
-out/
-bin/
-obj/
-docs/
-
-# If using Makefile out-of-tree builds:
 */build/
-*/bin/
-*/obj/
 
-# ============================
-# Backup / Temporary Files
-# ============================
-*~
-*.swp
-*.swo
-*.tmp
-*.bak
-
-# ============================
-# Logs
-# ============================
-*.log
-
-# ============================
-# Doxygen Output (Optional)
-# ============================
-*/docs/
-*/html/
-*/latex/
-doxyfile
-#doxygen-output/
-
-# ============================
-# IDE / Editor Files
-# ============================
-
-# VSCode
+# workspace
 .vscode/
 *.code-workspace
-
-# CLion / JetBrains
-.idea/
-cmake-build*/
-
-# Eclipse
-.settings/
-.cproject
-.project
-
-# ============================
-# OS Files
-# ============================
-
-# macOS
-.DS_Store
-
-# Windows
-Thumbs.db
