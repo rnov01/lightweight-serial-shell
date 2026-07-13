@@ -13,11 +13,11 @@ memusage.txt
 build_info.h
 
 #local build system files
-local.mk
-makefile
-main.c
-main.cpp
-project.mk
+/local.mk
+/makefile
+/main.c
+/main.cpp
+/project.mk
 
 # build dirs
 build/
