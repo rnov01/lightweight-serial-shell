@@ -18,6 +18,7 @@ build_info.h
 /main.c
 /main.cpp
 /project.mk
+notes/
 
 # build dirs
 build/

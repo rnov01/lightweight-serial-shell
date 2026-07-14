@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "shell.h"
-//#include "str_helpers.h"
 #include "shell_sys.h"
 #include "hw_interface.h"
 #include "descriptions.h"
@@ -13,10 +12,6 @@
 #include <stdlib.h>
 #endif
 
-/* Adjust include path if you have platform-specific register map table */
-/*#if TINY_REGMAP_EN
-#include SH_REGMAP_H
-#endif*/
 #ifndef BUILD_TARGET
 #define BUILD_TARGET "Unknown"
 #endif

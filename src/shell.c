@@ -6,7 +6,6 @@
 #include <string.h>
 
 #include "shell.h"
-//#include "str_helpers.h"
 #include "shell_sys.h"
 
 extern const shell_cmd_t sys_cmds[];
