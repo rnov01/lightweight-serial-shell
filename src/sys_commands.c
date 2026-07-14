@@ -38,7 +38,7 @@ static void cmd_rstbit(shell_t* sh, const shell_cmd_t* self, const char* param, 
 #endif
 
 /* shared description helpers */
-#if defined(SYS_CORE)
+#if (SYS_CORE)
 static const char s_cmds[] RODATA   = "commands: ";
 static const char s_flags[] RODATA  = "flags: ";
 static const char s_param[] RODATA  = "| param=";
@@ -112,7 +112,7 @@ static const shell_flag_t peek_flags[] = {
 
 //flag base must point to address of 1st flag in a contiguous block of flags belonging to a specific command
 //i.e. if a command has multiple flags, they must be next to each other and flag_base points to the address of the first
-#if defined(SYS_CORE) || (HELP_CMD) || (DUMP_CMD) || (VER_CMD) || (MEM_CMD) || PEEK_CMD
+#if (SYS_CORE) || (HELP_CMD) || (DUMP_CMD) || (VER_CMD) || (MEM_CMD) || PEEK_CMD
 const shell_cmd_t sys_cmds[] = {
     #if HELP_CMD
     {help_n, help_d, cmd_help, &help_c_flag, .sub = {FLAG_ONLY, NONE, true, 1} },
@@ -378,7 +378,7 @@ void cmd_mem(shell_t* sh, const shell_cmd_t* self, const char* param, uint8_t ar
     sh_puts(sh, self->name); sh_puts_ro(sh, ROSTR("ory settings\r\n")); 
     sh_puts_ro(sh, ROSTR(" cmds    : ")); print_uint(sh, sys_cmd_count + sh->cmd_count); LINE
     sh_puts_ro(sh, ROSTR(" flags   : ")); print_uint(sh, total_flag_count(sh)); LINE
-    sh_puts_ro(sh, ROSTR(" in buf  : ")); print_uint(sh, LINE_BUFFER_SIZE); LINE
+    sh_puts_ro(sh, ROSTR(" in buf  : ")); print_uint(sh, SH_BUFFER_SIZE); LINE
     sh_puts_ro(sh, ROSTR(" max arg : ")); print_uint(sh, MAX_ARGS); 
 }
 #endif

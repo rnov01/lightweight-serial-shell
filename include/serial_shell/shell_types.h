@@ -1,4 +1,5 @@
 #pragma once
+#include <serial_shell/config.h>
 #include <stdint.h>
 
 struct shell;
@@ -8,6 +9,39 @@ struct shell_flag;
 typedef struct shell        shell_t;
 typedef struct shell_cmd    shell_cmd_t;
 typedef struct shell_flag   shell_flag_t;
+
+/* ===================================================================
+ * Shell state
+ * 
+ * shell_t holds the runtime state of the shell and is initialized by the 
+ * user with the sh_init() function. sh_init() only takes in 
+ * the required putc() callback (the other implementations are optional, putc
+ * is all the shell needs for operation). If a user has puts() and/or puts_p() 
+ * (PROGMEM AVR puts function) they can be passed to the shell via this struct. 
+ * 
+ * An input buffer, argv array and putc() callback must be provided when calling sh_init() 
+ * =================================================================== */
+struct shell {
+    /* Output callbacks (user-provided) */
+    void (*putc)(void* user, char c);
+    void (*puts)(void* user, const char* s);        /* optional; may be NULL - shell will derive its own from putc() */
+    void (*puts_p)(void* user, const char* p);      /* optional for read-only (PROGMEM) strings */
+    void* io_user;                                  /* optional context pointer for object-based callback functions */
+
+    /* Input buffer */
+    char buffer[SH_BUFFER_SIZE];
+    uint8_t buf_len;
+    uint8_t position;
+
+    /* Token storage (argv, points into buffer)*/
+    char *argv[MAX_ARGS];
+    uint8_t argc;
+    uint8_t max_argv;
+
+    /* Command table */
+    const shell_cmd_t *cmd;
+    uint8_t cmd_count;
+};
 
 /* ===================================================================
  * Error handling
@@ -42,7 +76,7 @@ typedef enum param_mode {
     REQ,                /* required parameter; no parameter provided will result in error message */
     OPT,                /* optional parameter */
     MULTI               /* No named param, but allows multiple argv arguments */
-} cmd_param_t, flag_param_t;
+} sh_param_t;
 
 /*Optional color output (ANSI esc sequences)*/
 typedef enum color {

@@ -25,7 +25,7 @@ struct shell_flag {
     flag_handler handler;       /* callback for flag; may be NULL */
     struct {
         bool in_progmem         : 1;    /* description in PROGMEM (AVR) */
-        flag_param_t param_mode : 2;    /* flag parameter expectations */
+        sh_param_t param_mode : 2;    /* flag parameter expectations */
         uint8_t reserved        : 5;
     } sub;
 }; 
@@ -51,7 +51,7 @@ struct shell_cmd {
     const shell_flag_t* flag_base;        /* pointer to first flag for this command in a flag table */
     struct {
         unsigned flag_mode  : 2;    /* exe_mode_t */
-        unsigned param_mode : 2;    /* cmd_param_t */
+        unsigned param_mode : 2;    /* sh_param_t */
         unsigned in_progmem : 1;    /* description in PROGMEM (AVR)*/
         unsigned flag_count : 3;    /* # of member flags from flag_base */
     } sub;

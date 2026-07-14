@@ -18,21 +18,18 @@ static const shell_flag_t* sh_find_flag(const shell_cmd_t* cmd, const char* n);
 static void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv);
 static void sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const shell_flag_t* flag, const char* fparam, uint8_t argc, char** argv);
 
-void sh_init(shell_t* sh, const shell_cmd_t* user_cmds, char* input_buf, uint8_t buf_len, 
-    char** argv, uint8_t max_argv, void (*putc)(void* user, char c), void* io_user, uint8_t cmd_count) {
+void sh_init(shell_t* sh, const shell_cmd_t* user_cmds, void (*putc)(void* user, char c), void* io_user, uint8_t cmd_count) {
     
     sh->putc = putc;
     sh->puts = NULL;
     sh->puts_p = NULL;
     sh->io_user = io_user;
 
-    sh->buffer = input_buf;
-    sh->buf_len = buf_len;
+    sh->buf_len = SH_BUFFER_SIZE;
     sh->position = 0;
 
-    sh->argv = argv;
     sh->argc = 0;
-    sh->max_argv = max_argv;
+    sh->max_argv = MAX_ARGS;
 
     sh->cmd = user_cmds;
     sh->cmd_count = cmd_count;
