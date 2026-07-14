@@ -41,9 +41,7 @@ int main() {
     usart_init(&USART0, 19200, 8);
     sei();
 
-    static char line_buf[32];
-    static char* argv[8];
-    sh_init(&sh, NULL, line_buf, sizeof(line_buf), argv, sizeof(argv) / sizeof(argv[0]), shell_putc, &USART0, 0);
+    sh_init(&sh, NULL, shell_putc, &USART0, 0);
 
     //poll buffer regularly to check for commands in global buffer
     while (1) {
