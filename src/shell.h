@@ -43,6 +43,9 @@
 /* Table of error descriptions strings (*in flash on AVR)*/
 extern const char* const err_msg[];
 
+extern const shell_cmd_t sys_cmds[];
+extern const uint8_t sys_cmd_count;
+
 /* Parse indices
  * sh_parse_idx keeps track of the location of command parameters and 
  * flags in the input buffer. It stores which indices in the buffer correspond
@@ -74,6 +77,12 @@ const char*         get_error_string(err_t e);
 
 /* Flag related helpers */
 bool                sh_has_flag(uint8_t argc, char **argv, const char* f);    //check if user input has flag argument
+
+int tokenizer(char* buf, char** argv, uint8_t max_args);
+void sh_execute(shell_t* sh, uint8_t argc, char** argv);
+err_t sh_parse_args(const shell_cmd_t* cmd, uint8_t argc, char**argv, sh_parse_idx_t* out,
+    const char** err_arg);
+const shell_cmd_t* sh_find_cmd(shell_t* sh, const char *name);
 
 /* Optional debug helpers used for register-reading (peek) */
 bool                is_valid_addr(uintptr_t addr);

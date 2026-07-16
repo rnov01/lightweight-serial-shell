@@ -54,7 +54,7 @@
 //enable color coded command and flag names
 //default cyan - sys cmd, yellow - user command, green - flag, red - error
 #ifndef SH_COLOR_ON
-#define SH_COLOR_ON
+#define SH_COLOR_ON 1
 #endif
 
 //future task

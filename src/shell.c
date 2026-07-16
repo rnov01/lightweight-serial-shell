@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <serial_shell/serial_shell.h>
 #include "shell.h"
 #include "shell_sys.h"
 
@@ -12,8 +13,8 @@ extern const shell_cmd_t sys_cmds[];
 extern const uint8_t sys_cmd_count;
 
 /* Forward Declarations */
-static void sh_execute(shell_t* sh, uint8_t argc, char** argv);
-static int tokenizer(char* buf, char** argv, uint8_t max_args);
+//static void sh_execute(shell_t* sh, uint8_t argc, char** argv);
+//static int tokenizer(char* buf, char** argv, uint8_t max_args);
 static const shell_flag_t* sh_find_flag(const shell_cmd_t* cmd, const char* n);
 static void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv);
 static void sh_dispatch_flag(shell_t* sh, const shell_cmd_t* parent, const shell_flag_t* flag, const char* fparam, uint8_t argc, char** argv);
@@ -195,8 +196,8 @@ const char * const err_msg[] RODATA = {
 
 
 
-static const shell_cmd_t* sh_find_cmd(shell_t* sh, const char *name) {
-    if (!sh ||!name) return NULL;
+const shell_cmd_t* sh_find_cmd(shell_t* sh, const char *name) {
+    if (!sh || !name) return NULL;
 
     for (uint8_t i=0; i < sys_cmd_count; i++) {
         if (sys_cmds[i].name && strcmp(name, sys_cmds[i].name) == 0) {
@@ -204,79 +205,32 @@ static const shell_cmd_t* sh_find_cmd(shell_t* sh, const char *name) {
         }
     }
 
+    if (!sh->cmd) return NULL;
     for (uint8_t i = 0; i < sh->cmd_count; i++) {
-        const shell_cmd_t *c = &sh->cmd[i];
-        if (c->name && strcmp(name, c->name) == 0) {
-            return c;
+        const shell_cmd_t *usr_cmd = &sh->cmd[i];
+        if (usr_cmd->name && strcmp(name, usr_cmd->name) == 0) {
+            return usr_cmd;
         } 
     }
     return NULL;
 }
 
-/*first pass finds command params and counts flags*/
-static err_t sh_parse_args(const shell_cmd_t* cmd, uint8_t argc, char**argv, sh_parse_idx_t* out,
-    const char** err_arg) {
-    
-    if (!cmd || !out) return RUNTIME_FAILURE;
+int tokenizer(char* buf, char** argv, uint8_t max_args) {
+    uint8_t argc = 0;
+    uint8_t i = 0;
+    while(buf[i] && argc < max_args) {
+        while(buf[i] == ' ') i++;
+        if(!buf[i]) break;
 
-    if (cmd->sub.param_mode == MULTI) {
-        out->param_idx = -1;
-        out->flag_count = 0;
-        return NONE;
-    }
+        argv[argc++] = &buf[i];
 
-    out->param_idx = -1; //no param
-    out->flag_count = 0;
-    
-    for(uint8_t i=1; i<argc; i++) {
-        const char*arg = argv[i];
-        if (!arg) continue;
-        
-        if (arg[0] == '-' && arg[1] != '\0') {
-            if(out->flag_count >= MAX_FLAGS) {
-                if (err_arg) *err_arg = arg;
-                return RUNTIME_FAILURE;
-            }
-            out->flag_pos[out->flag_count++] = (uint8_t)i;
-        } else {
-            if (i > 1) {
-                const char* prev = argv[i - 1];
-                if(prev && prev[0] == '-' && prev[1] != '\0') {
-                    const shell_flag_t* prev_fl = sh_find_flag(cmd, prev);
-                    if (prev_fl && prev_fl->sub.param_mode != NOPARAM) {
-                        continue;
-                    }
-                }
-                
-            } 
-            if (out->param_idx >= 0) {
-                if(err_arg) *err_arg = arg;
-                return INVALID_PARAM;
-            }
-            out->param_idx = (int8_t)i;
-        }
+        while(buf[i] && buf[i] != ' ') i++;
+        if (buf[i]) buf[i++] = '\0';
     }
-
-    switch (cmd->sub.param_mode) {
-        case REQ:
-            if(out->param_idx < 0) {
-                if(err_arg) *err_arg = cmd->name;
-                return MISSING_ARG;
-            }
-            break;
-        case NONE:
-            if (out->param_idx >= 0) {
-                if(err_arg) *err_arg = argv[out->param_idx];
-                return INVALID_PARAM;
-            }
-            break;
-        case OPT:
-            break;
-    }
-    return NONE;
+    return argc;
 }
 
-static void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
+void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
     if(!sh || argc <= 0 || !argv[0]) return;
 
     const shell_cmd_t *cmd = sh_find_cmd(sh, argv[0]);
@@ -366,6 +320,71 @@ static void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
     }
 }
 
+/*first pass finds command params and counts flags*/
+err_t sh_parse_args(const shell_cmd_t* cmd, uint8_t argc, char**argv, sh_parse_idx_t* out,
+    const char** err_arg) {
+    
+    if (!cmd || !out) return RUNTIME_FAILURE;
+
+    if (cmd->sub.param_mode == MULTI) {
+        out->param_idx = -1;
+        out->flag_count = 0;
+        return NONE;
+    }
+
+    out->param_idx = -1; //no param
+    out->flag_count = 0;
+    
+    for(uint8_t i=1; i<argc; i++) {
+        const char*arg = argv[i];
+        if (!arg) continue;
+        
+        if (arg[0] == '-' && arg[1] != '\0') {
+            if(out->flag_count >= MAX_FLAGS) {
+                if (err_arg) *err_arg = arg;
+                return RUNTIME_FAILURE;
+            }
+            out->flag_pos[out->flag_count++] = (uint8_t)i;
+        } else {
+            if (i > 1) {
+                const char* prev = argv[i - 1];
+                if(prev && prev[0] == '-' && prev[1] != '\0') {
+                    const shell_flag_t* prev_fl = sh_find_flag(cmd, prev);
+                    if (prev_fl && prev_fl->sub.param_mode != NOPARAM) {
+                        continue;
+                    }
+                }
+                
+            } 
+            if (out->param_idx >= 0) {
+                if(err_arg) *err_arg = arg;
+                return INVALID_PARAM;
+            }
+            out->param_idx = (int8_t)i;
+        }
+    }
+
+    switch (cmd->sub.param_mode) {
+        case REQ:
+            if(out->param_idx < 0) {
+                if(err_arg) *err_arg = cmd->name;
+                return MISSING_ARG;
+            }
+            break;
+        case NONE:
+            if (out->param_idx >= 0) {
+                if(err_arg) *err_arg = argv[out->param_idx];
+                return INVALID_PARAM;
+            }
+            break;
+        case OPT:
+            break;
+    }
+    return NONE;
+}
+
+
+
 /*int tokenizer(char *buf, char **argv, uint8_t max_args) {
     uint8_t argc = 0;
     char *token = strtok(buf, " ");
@@ -377,20 +396,7 @@ static void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
     return argc;
 }*/
 
-static int tokenizer(char* buf, char** argv, uint8_t max_args) {
-    uint8_t argc = 0;
-    uint8_t i = 0;
-    while(buf[i] && argc < max_args) {
-        while(buf[i] == ' ') i++;
-        if(!buf[i]) break;
 
-        argv[argc++] = &buf[i];
-
-        while(buf[i] && buf[i] != ' ') i++;
-        if (buf[i]) buf[i++] = '\0';
-    }
-    return argc;
-}
 
 static void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv) {
     cmd->handler(sh, cmd, param, argc, argv);

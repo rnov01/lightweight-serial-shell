@@ -4,6 +4,7 @@
 #include <serial_shell/hooks.h>
 #include <string.h>
 
+#include <serial_shell/serial_shell.h>
 #include "shell.h"
 #include "shell_sys.h"
 #include "hw_interface.h"
