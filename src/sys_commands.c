@@ -380,7 +380,7 @@ void cmd_mem(shell_t* sh, const shell_cmd_t* self, const char* param, uint8_t ar
     sh_puts_ro(sh, ROSTR(" cmds    : ")); print_uint(sh, sys_cmd_count + sh->cmd_count); LINE
     sh_puts_ro(sh, ROSTR(" flags   : ")); print_uint(sh, total_flag_count(sh)); LINE
     sh_puts_ro(sh, ROSTR(" in buf  : ")); print_uint(sh, SH_BUFFER_SIZE); LINE
-    sh_puts_ro(sh, ROSTR(" max arg : ")); print_uint(sh, MAX_ARGS); 
+    sh_puts_ro(sh, ROSTR(" max arg : ")); print_uint(sh, MAX_ARGS); LINE
 }
 #endif
 
