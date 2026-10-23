@@ -5,13 +5,13 @@ A small hardware-agnostic command line shell primarily for microcontrollers. Byt
 - Only requires a character write function (i.e. `putchar()`) tied to any serial interface and a method to feed bytes into the shell
 - User command table can be created using handler prototypes and passed to shell at initialization
 - Several built in 'system' commands are available and can be omitted at compile time if not needed
-- Some AVR specific optimizations to store most backend text strings in `PROGMEM` to reduce RAM usage. 
+- Includes AVR specific optimizations to store most backend text strings in `PROGMEM` to reduce RAM usage. 
 
 ## How to Use:
 
 Main entry point is `include/serial_shell/serial_shell.h`
 
-A small ring buffer at `include/serial_shell/ring_buf.h` is also included as one method of feeding bytes into the shell. Use of the ring buffer with the shell is demonstrated in the provided [example](examples/atmega2560/main.c).
+A small ring buffer at `include/serial_shell/ring_buf.h` is also included as one method of feeding bytes into the shell. Use of the ring buffer with the shell is demonstrated in the provided [examples](examples/).
 
 Minimum steps to use:
 1. Include the header file `<serial_shell/serial_shell.h>`
@@ -24,20 +24,22 @@ Minimum steps to use:
 ```
 - Note: the user pointer is available if you have an object-based implementation for your serial interface.
 
-3. Allocate shell instance, input line buffer, argument buffer. 
+3. (Optional) Define user commands / command table. See [example](examples/stm32_f411re/user_commands.c)
 ```c
-    static shell_t my_shell;
-    static char my_line_buffer[LINE_BUFFER_SIZE];
-    static char *argv[MAX_ARGS];
-```
-4. Initialize the shell. 
-```c
-    uint8_t buf_len = sizeof(my_line_buffer);
-    uint8_t arg_len = sizeof(argv) / sizeof(argv[0]);
-    sh_init(&my_shell, NULL, my_line_buffer, buf_len, argv, arg_len, shell_putc, NULL, 0);
+/* user_commands.h */
+extern const shell_cmd_t user_cmds[];
+extern const uint8_t user_command_count;
+
 ```
 
-5. Feed bytes into `sh_poll()`
+3. Allocate shell instance and initialize.
+```c
+    static shell_t my_shell;
+    sh_init(&my_shell, user_commands, shell_putc, NULL, user_command_count);
+    // or leave user `user_cmds` NULL
+```
+
+4. Feed bytes into `sh_poll()`
 
 ## Config
 
@@ -87,10 +89,18 @@ In addition to the configuration header, `include/serial_shell/shell_commands.h`
 
 ## Build
 
-For the included atmega2560 example:
+Atmega2560:
 - Set the proper COM port in `local.mk`
 ```sh
     cd examples/atmega2560
     make avr
     make flash
+```
+
+STM32:
+- Set path to openocd in `local.mk`
+```bash
+cd examples/stm32_f411re
+make all
+make flash
 ```
