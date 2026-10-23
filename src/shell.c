@@ -28,25 +28,24 @@ void sh_init(shell_t* sh, const shell_cmd_t* user_cmds, void (*putc)(void* user,
 
     sh->buf_len = SH_BUFFER_SIZE;
     sh->position = 0;
+    sh->ovf = false;
 
     sh->argc = 0;
     sh->max_argv = MAX_ARGS;
 
     sh->cmd = user_cmds;
     sh->cmd_count = cmd_count;
-
+    
     sh_puts_ro(sh, ROSTR(" ...shell active... "));
 }
 
 int sh_poll(shell_t* sh, uint8_t c) {
 
-    if ((c == '\b' || c == 0x7F) && sh->position > 0) {  //handle backspace
-        sh->position--;
-        return 2;
-    }
-
-    if (c == '\r' || c == '\n') {       //end of command   
-        if(sh->position > 0) {
+    if (c == '\r' || c == '\n') {       //end of command  
+        
+        if(sh->ovf) {
+            error_ro(sh, RUNTIME_FAILURE, ROSTR("line too long"));
+        } else if(sh->position > 0) {
             sh->buffer[sh->position] = '\0';       //terminate str
     
             //clr argv array
@@ -54,21 +53,37 @@ int sh_poll(shell_t* sh, uint8_t c) {
                 sh->argv[i] = NULL;
             }
 
-            sh->argc = tokenizer(sh->buffer, sh->argv, sh->max_argv);
+            int argc = tokenizer(sh->buffer, sh->argv, sh->max_argv);
 
-            if (sh->argc > 0 && sh->argv[0]) {
+            if (argc < 0) {
+                error_ro(sh, INVALID_PARAM, ROSTR("too many args"));
+            } else if (argc > 0 && sh->argv[0]) {
+                sh->argc = (uint8_t)argc;
                 sh_execute(sh, sh->argc, sh->argv);
             } 
         }
-        sh->position = 0;  
+        sh->position = 0;
+        sh->ovf = false;
         return 1;        
     }
+
+    if (sh->ovf) {
+        return 3;
+    }
+
+     if (c == '\b' || c == 0x7F) {  //handle backspace
+        if (sh->position > 0) {
+            sh->position--;
+        }
+        return 2;
+    }
+
     if (sh->position < sh->buf_len - 1) {    //append single char if space available
         sh->buffer[sh->position++] = (char)c;
     } else {
-        error_ro(sh, RUNTIME_FAILURE, ROSTR("line too long"));
+        sh->ovf = true;
     }
-   
+
     return 3;
 }
 
@@ -218,9 +233,12 @@ const shell_cmd_t* sh_find_cmd(shell_t* sh, const char *name) {
 int tokenizer(char* buf, char** argv, uint8_t max_args) {
     uint8_t argc = 0;
     uint8_t i = 0;
-    while(buf[i] && argc < max_args) {
+
+    while(buf[i]) {
         while(buf[i] == ' ') i++;
         if(!buf[i]) break;
+
+        if (argc >= max_args) return -1;
 
         argv[argc++] = &buf[i];
 
@@ -399,6 +417,8 @@ err_t sh_parse_args(const shell_cmd_t* cmd, uint8_t argc, char**argv, sh_parse_i
 
 
 static void sh_dispatch_handler(shell_t* sh, const shell_cmd_t* cmd, const char* param, uint8_t argc, char** argv) {
+    if (!cmd || !cmd->handler) return;
+
     cmd->handler(sh, cmd, param, argc, argv);
 }
 
@@ -473,6 +493,11 @@ bool parse_uint(const char* s, uint32_t* out) {
         } else {
             return false;
         }
+
+        if (value > (UINT32_MAX - d) / base) {
+            return false;
+        }
+
         value = (value * base) + d;
     }
     *out = value;

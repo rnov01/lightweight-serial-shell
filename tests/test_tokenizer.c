@@ -96,19 +96,18 @@ void test_tokenizer_max_args_zero(void) {
 
     int argc = tokenizer(input, argv, 0);
 
-    TEST_ASSERT_EQUAL(0, argc);
+    TEST_ASSERT_EQUAL(-1, argc);
     TEST_ASSERT_NULL(argv[0]);
 }
 
-/* Expected truncate args > MAX_ARGS *guarded at higher level* */
+/* Expected reject inputs > MAX_ARGS */
 void test_tokenizer_arg_over_max(void) {
     char input[] = "1 2 3 4 5 6 7 8 9";
     char *argv[MAX_ARGS] = {0};
 
     int argc = tokenizer(input, argv, MAX_ARGS);
 
-    TEST_ASSERT_EQUAL(5, argc);
-    TEST_ASSERT_EQUAL_UINT(5, argc);
+    TEST_ASSERT_EQUAL(-1, argc);
     TEST_ASSERT_EQUAL_STRING("1", argv[0]);
     TEST_ASSERT_EQUAL_STRING("2", argv[1]);
     TEST_ASSERT_EQUAL_STRING("3", argv[2]);

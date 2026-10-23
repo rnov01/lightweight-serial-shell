@@ -1,6 +1,7 @@
 #pragma once
 #include <serial_shell/config.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 struct shell;
 struct shell_cmd;
@@ -32,6 +33,7 @@ struct shell {
     char buffer[SH_BUFFER_SIZE];
     uint8_t buf_len;
     uint8_t position;
+    bool ovf;
 
     /* Token storage (argv, points into buffer)*/
     char *argv[MAX_ARGS];
