@@ -126,7 +126,7 @@ $(OBJ_DIR)/app/%.o: $(MK_DIR)/%.c $(BUILD_INFO)
 $(OUT_ELF): $(BUILD_INFO) $(OBJS)
 	@mkdir -p $(dir $@)
 	$(CC) $(LDFLAGS) $(OBJS) -o $@
-	$(SIZE) -C --mcu=$(MCU) $@
+	$(SIZE) --format=avr --mcu=$(MCU) $@
 
 $(OUT_HEX): $(OUT_ELF)
 	$(OBJCOPY) -O ihex -R .eeprom $< $@
@@ -140,7 +140,7 @@ $(OUT_HEX): $(OUT_ELF)
 all: $(OUT_HEX)
 
 size: $(OUT_ELF)
-	$(SIZE) -C --mcu=$(MCU) $<
+	$(SIZE) --format=avr --mcu=$(MCU) $<
 
 flash: $(OUT_HEX)
 ifndef AVRDUDE_PORT
