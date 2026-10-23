@@ -7,6 +7,10 @@ A small hardware-agnostic command line shell primarily for microcontrollers. Byt
 - Several built in 'system' commands are available and can be omitted at compile time if not needed
 - Includes AVR specific optimizations to store most backend text strings in `PROGMEM` to reduce RAM usage. 
 
+<p align="center">
+  <img src="docs/images/shell-demo.png" alt="Serial Shell demo" width="400">
+</p>
+
 ## How to Use:
 
 Main entry point is `include/serial_shell/serial_shell.h`

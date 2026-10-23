@@ -254,7 +254,7 @@ void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
     const shell_cmd_t *cmd = sh_find_cmd(sh, argv[0]);
     if (!cmd) {
         error(sh, INVALID_CMD, argv[0]);
-        sh_puts_ro(sh, ROSTR("\r\nhelp gives cmd list"));
+        sh_puts_ro(sh, ROSTR("\r\nhelp gives cmd list\r\n"));
         return;
     }
   
