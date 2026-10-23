@@ -9,7 +9,10 @@ BOARD	  	:= nucleo-f411re
 CC        	:= arm-none-eabi-gcc
 OBJCOPY   	:= arm-none-eabi-objcopy
 SIZE      	:= arm-none-eabi-size
+
+#override in local.mk
 OPENOCD   	?= openocd
+OPENOCD_SCRIPTS ?= openocd/scripts
 
 MK_DIR 		:= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SH_ROOT 	:= $(abspath $(MK_DIR)/../..)

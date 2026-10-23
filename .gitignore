@@ -27,3 +27,4 @@ build/
 # workspace
 .vscode/
 *.code-workspace
+**/local.mk

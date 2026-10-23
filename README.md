@@ -84,15 +84,27 @@ In addition to the configuration header, `include/serial_shell/shell_commands.h`
 ## Build
 
 Atmega2560:
-- Set the proper COM port in `local.mk`
+- Set `AVRDUDE_PORT` COM port in `local.mk`
+```make
+    # local.mk
+    # change to your port (COMx for Windows)
+    AVRDUDE_PORT := /dev/ttyACM0 
+```
+
 ```sh
     cd examples/atmega2560
-    make avr
+    make all
     make flash
 ```
 
 STM32:
-- Set path to openocd in `local.mk`
+- Create `local.mk` to override openocd paths. Point `OPENOCD` to the executable path and `OPENOCD_SCRIPTS` to the directory containing OpenOCD's interface and target scripts. 
+```make
+    # local.mk
+    OPENOCD := /usr/bin/openocd
+    OPENOCD_SCRIPTS := /usr/share/openocd/scripts
+```
+
 ```bash
 cd examples/stm32_f411re
 make all
