@@ -8,7 +8,7 @@ A small hardware-agnostic command line shell primarily for microcontrollers. Byt
 - Includes AVR specific optimizations to store most backend text strings in `PROGMEM` to reduce RAM usage. 
 
 <p align="center">
-  <img src="docs/images/shell-demo.png" alt="Serial Shell demo" width="400">
+  <img src="docs/images/shell_demo.png" alt="Serial Shell demo" width="400">
 </p>
 
 ## How to Use:
