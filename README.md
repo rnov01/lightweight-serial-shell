@@ -25,21 +25,15 @@ Minimum steps to use:
 - Note: the user pointer is available if you have an object-based implementation for your serial interface.
 
 3. (Optional) Define user commands / command table. See [example](examples/stm32_f411re/user_commands.c)
-```c
-/* user_commands.h */
-extern const shell_cmd_t user_cmds[];
-extern const uint8_t user_command_count;
 
-```
-
-3. Allocate shell instance and initialize.
+4. Allocate shell instance and initialize.
 ```c
     static shell_t my_shell;
-    sh_init(&my_shell, user_commands, shell_putc, NULL, user_command_count);
+    sh_init(&my_shell, my_commands, shell_putc, NULL, command_count);
     // or leave user `user_cmds` NULL
 ```
 
-4. Feed bytes into `sh_poll()`
+5. Feed bytes into `sh_poll()`
 
 ## Config
 
@@ -66,8 +60,8 @@ In addition to the configuration header, `include/serial_shell/shell_commands.h`
 
 4. Pass a pointer to your command table into shell on init
 ```c
-    uint8_t num_cmds = sizeof(my_commands) / sizeof(my_commands[0]);
-    sh_init(&my_shell, my_commands, line_buf, buf_len, argv, arg_len, shell_putc, NULL, num_cmds);
+    const uint8_t command_count = sizeof(my_commands) / sizeof(my_commands[0]);
+    sh_init(&my_shell, my_commands, shell_putc, NULL, command_count);
 ```
 
 

@@ -271,6 +271,23 @@ void sh_execute(shell_t* sh, uint8_t argc, char** argv) {
 
     switch (cmd->sub.flag_mode) {
         case CMD_THEN_FLAG:
+             for(uint8_t i=0; i<idx.flag_count; i++) {
+                uint8_t k = idx.flag_pos[i];
+                const char* flag_name = argv[k];
+                const shell_flag_t *fl = sh_find_flag(cmd, flag_name);
+
+                if (!fl) {
+                    error(sh, UNKNOWN_FLAG, flag_name);
+                    return;
+                }
+
+                if (fl->sub.param_mode ==  REQ) {
+                    if ((k+1) >= argc || !argv[k+1] || argv[k+1][0] == '-') {
+                        error(sh, MISSING_ARG, fl->name);
+                        return;
+                    }
+                }
+            }
             sh_dispatch_handler(sh, cmd, cmd_param, argc, argv);
             for(uint8_t i=0; i<idx.flag_count; i++) {
                 uint8_t k = idx.flag_pos[i];
