@@ -1,6 +1,6 @@
 # Serial Shell
 
-A small hardware-agnostic command line shell primarily for microcontrollers. Bytes fed to the shell are parsed and once a command is detected, the dispatcher executes the corresponding handler function.
+A small hardware-agnostic command line shell for microcontrollers. Provides an interactive command interface for rapid development, debugging and hardware experimentation. Quickly expose firmware functions through configurable command tables without repeatedly modifying/flashing firmware. 
 
 - Only requires a character write function (i.e. `putchar()`) tied to any serial interface and a method to feed bytes into the shell
 - User command table can be created using handler prototypes and passed to shell at initialization
